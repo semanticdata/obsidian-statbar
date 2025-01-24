@@ -9,6 +9,7 @@ This plugin adds a word and character counter to the status bar in Obsidian. It 
 -   Updates automatically as you type
 -   Ignores Markdown syntax when counting words
 -   Works with any Markdown file in your vault
+-   Displays character count without spaces in a tooltip on hover
 
 ## 📦 Installation (_NOT AVAILABLE IN THE COMMUNITY PLUGINS YET!_)
 
