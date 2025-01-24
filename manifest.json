@@ -1,11 +1,11 @@
 {
-	"id": "sample-plugin",
-	"name": "Sample Plugin",
+	"id": "obsidian-word-counter",
+	"name": "Word Counter",
 	"version": "1.0.0",
 	"minAppVersion": "0.15.0",
-	"description": "Demonstrates some of the capabilities of the Obsidian API.",
-	"author": "Obsidian",
-	"authorUrl": "https://obsidian.md",
-	"fundingUrl": "https://obsidian.md/pricing",
-	"isDesktopOnly": false
+	"description": "Counts the words in your notes.",
+	"author": "Miguel Pimentel",
+	"authorUrl": "https://github.com/semanticdata",
+	"fundingUrl": "https://github.com/sponsors/semanticdata",
+	"isDesktopOnly": true
 }
