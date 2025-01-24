@@ -54,16 +54,36 @@ export default class WordCountPlugin extends Plugin {
 			const text = activeView.getViewData();
 			const wordCount = this.getWordCount(text);
 			const charCount = text.length;
+			const charNoSpaces = text.replace(/\s/g, "").length;
 
-			this.statusBarItemEl.setText(`W: ${wordCount} Ch: ${charCount}`);
+			this.statusBarItemEl.setText(
+				`W: ${wordCount.toLocaleString()} ` +
+					`Ch: ${charCount.toLocaleString()}`
+			);
+
+			// Add tooltip with additional details
+			this.statusBarItemEl.setAttribute(
+				"aria-label",
+				`Words: ${wordCount.toLocaleString()} ` +
+					`Characters: ${charCount.toLocaleString()} (${charNoSpaces.toLocaleString()} no spaces)`
+			);
 		} else {
 			this.statusBarItemEl.setText("");
+			this.statusBarItemEl.setAttribute("aria-label", "");
 		}
 	}
 
 	private getWordCount(text: string): number {
-		// Remove markdown syntax and count words
-		const cleanText = text.replace(/[#*`_\[\]()~>]/g, " ");
+		// Remove markdown syntax, URLs, and other special patterns
+		const cleanText = text
+			.replace(/\[\[([^\]]+)\]\]/g, "$1") // Remove wiki links but keep text
+			.replace(/\[([^\]]+)\]\([^\)]+\)/g, "$1") // Remove MD links but keep text
+			.replace(/`[^`]+`/g, "") // Remove inline code
+			.replace(/```[\s\S]*?```/g, "") // Remove code blocks
+			.replace(/[#*`_~>]/g, " ") // Remove remaining MD syntax
+			.replace(/\s+/g, " ") // Normalize whitespace
+			.trim();
+
 		const words = cleanText.split(/\s+/).filter((word) => word.length > 0);
 		return words.length;
 	}
