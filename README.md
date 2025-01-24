@@ -1,4 +1,4 @@
-# Status Bar Word/Character Counter for Obsidian
+# Status Bar Word/Character Counter for Obsidian (StatBar? Name is a work in progress)
 
 This plugin adds a word and character counter to the status bar in Obsidian. It updates automatically as you type and ignores Markdown syntax when counting words.
 
