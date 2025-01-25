@@ -7,7 +7,9 @@ import {
 	Plugin,
 	PluginSettingTab,
 	Setting,
+	PluginManifest,
 } from "obsidian";
+import { SampleSettingTab } from "./settings"; // Import the new settings class
 
 // Remember to rename these classes and interfaces!
 
@@ -20,8 +22,14 @@ const DEFAULT_SETTINGS: MyPluginSettings = {
 };
 
 export default class WordCountPlugin extends Plugin {
-	settings: MyPluginSettings;
-	statusBarItemEl: HTMLElement;
+	settings!: MyPluginSettings;
+	statusBarItemEl!: HTMLElement;
+
+	constructor(app: App, manifest: PluginManifest) {
+		super(app, manifest);
+		this.settings = { mySetting: "default" };
+		this.statusBarItemEl = document.createElement("div");
+	}
 
 	async onload() {
 		await this.loadSettings();
@@ -45,6 +53,9 @@ export default class WordCountPlugin extends Plugin {
 				this.updateWordCount();
 			})
 		);
+
+		// Add settings tab
+		this.addSettingTab(new SampleSettingTab(this.app, this));
 	}
 
 	private updateWordCount() {
@@ -118,31 +129,3 @@ class SampleModal extends Modal {
 		contentEl.empty();
 	}
 }
-
-// class SampleSettingTab extends PluginSettingTab {
-// 	plugin: MyPlugin;
-
-// 	constructor(app: App, plugin: MyPlugin) {
-// 		super(app, plugin);
-// 		this.plugin = plugin;
-// 	}
-
-// 	display(): void {
-// 		const { containerEl } = this;
-
-// 		containerEl.empty();
-
-// 		new Setting(containerEl)
-// 			.setName("Setting #1")
-// 			.setDesc("It's a secret")
-// 			.addText((text) =>
-// 				text
-// 					.setPlaceholder("Enter your secret")
-// 					.setValue(this.plugin.settings.mySetting)
-// 					.onChange(async (value) => {
-// 						this.plugin.settings.mySetting = value;
-// 						await this.plugin.saveSettings();
-// 					})
-// 			);
-// 	}
-// }
