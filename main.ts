@@ -1,14 +1,4 @@
-import {
-	App,
-	Editor,
-	MarkdownView,
-	Modal,
-	Notice,
-	Plugin,
-	PluginSettingTab,
-	Setting,
-	PluginManifest,
-} from "obsidian";
+import { App, MarkdownView, Plugin, PluginManifest } from "obsidian";
 import { SampleSettingTab } from "./settings"; // Import the new settings class
 
 // Remember to rename these classes and interfaces!
@@ -16,20 +6,20 @@ import { SampleSettingTab } from "./settings"; // Import the new settings class
 interface MyPluginSettings {
 	showWordCount: boolean;
 	showCharCount: boolean;
-	wordLabel: string;
-	charLabel: string;
+	wordLabel: string; // Label for word count
+	charLabel: string; // Label for character count
 }
 
 const DEFAULT_SETTINGS: MyPluginSettings = {
 	showWordCount: true,
 	showCharCount: true,
-	wordLabel: "W:",
-	charLabel: "Ch:",
+	wordLabel: "W:", // Default label for word count
+	charLabel: "Ch:", // Default label for character count
 };
 
 export default class WordCountPlugin extends Plugin {
-	settings!: MyPluginSettings;
-	statusBarItemEl!: HTMLElement;
+	settings!: MyPluginSettings; // Use definite assignment assertion
+	statusBarItemEl!: HTMLElement; // Use definite assignment assertion
 
 	constructor(app: App, manifest: PluginManifest) {
 		super(app, manifest);
@@ -39,10 +29,10 @@ export default class WordCountPlugin extends Plugin {
 			wordLabel: "W:",
 			charLabel: "Ch:",
 		};
-		this.statusBarItemEl = document.createElement("div");
+		this.statusBarItemEl = document.createElement("div"); // Initialize with a default HTMLElement
 	}
 
-	async onload() {
+	public async onload() {
 		await this.loadSettings();
 
 		// Create status bar item
@@ -119,8 +109,6 @@ export default class WordCountPlugin extends Plugin {
 		return words.length;
 	}
 
-	onunload() {}
-
 	async loadSettings() {
 		this.settings = Object.assign(
 			{},
@@ -131,21 +119,5 @@ export default class WordCountPlugin extends Plugin {
 
 	async saveSettings() {
 		await this.saveData(this.settings);
-	}
-}
-
-class SampleModal extends Modal {
-	constructor(app: App) {
-		super(app);
-	}
-
-	onOpen() {
-		const { contentEl } = this;
-		contentEl.setText("Woah!");
-	}
-
-	onClose() {
-		const { contentEl } = this;
-		contentEl.empty();
 	}
 }
