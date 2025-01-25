@@ -15,15 +15,28 @@ export class SampleSettingTab extends PluginSettingTab {
 		containerEl.empty();
 
 		new Setting(containerEl)
-			.setName("Setting #1")
-			.setDesc("It's a secret")
-			.addText((text) =>
-				text
-					.setPlaceholder("Enter your secret")
-					.setValue(this.plugin.settings.mySetting)
+			.setName("Show Word Count")
+			.setDesc("Toggle to display the word count in the status bar.")
+			.addToggle((toggle) =>
+				toggle
+					.setValue(this.plugin.settings.showWordCount)
 					.onChange(async (value) => {
-						this.plugin.settings.mySetting = value;
+						this.plugin.settings.showWordCount = value;
 						await this.plugin.saveSettings();
+						this.plugin.updateWordCount(); // Update display immediately
+					})
+			);
+
+		new Setting(containerEl)
+			.setName("Show Character Count")
+			.setDesc("Toggle to display the character count in the status bar.")
+			.addToggle((toggle) =>
+				toggle
+					.setValue(this.plugin.settings.showCharCount)
+					.onChange(async (value) => {
+						this.plugin.settings.showCharCount = value;
+						await this.plugin.saveSettings();
+						this.plugin.updateWordCount(); // Update display immediately
 					})
 			);
 	}

@@ -14,11 +14,13 @@ import { SampleSettingTab } from "./settings"; // Import the new settings class
 // Remember to rename these classes and interfaces!
 
 interface MyPluginSettings {
-	mySetting: string;
+	showWordCount: boolean;
+	showCharCount: boolean;
 }
 
 const DEFAULT_SETTINGS: MyPluginSettings = {
-	mySetting: "default",
+	showWordCount: true,
+	showCharCount: true,
 };
 
 export default class WordCountPlugin extends Plugin {
@@ -27,7 +29,10 @@ export default class WordCountPlugin extends Plugin {
 
 	constructor(app: App, manifest: PluginManifest) {
 		super(app, manifest);
-		this.settings = { mySetting: "default" };
+		this.settings = {
+			showWordCount: true,
+			showCharCount: true,
+		};
 		this.statusBarItemEl = document.createElement("div");
 	}
 
@@ -58,7 +63,7 @@ export default class WordCountPlugin extends Plugin {
 		this.addSettingTab(new SampleSettingTab(this.app, this));
 	}
 
-	private updateWordCount() {
+	public updateWordCount() {
 		const activeView = this.app.workspace.getActiveViewOfType(MarkdownView);
 
 		if (activeView) {
@@ -67,10 +72,15 @@ export default class WordCountPlugin extends Plugin {
 			const charCount = text.length;
 			const charNoSpaces = text.replace(/\s/g, "").length;
 
-			this.statusBarItemEl.setText(
-				`W: ${wordCount.toLocaleString()} ` +
-					`Ch: ${charCount.toLocaleString()}`
-			);
+			let statusText = "";
+			if (this.settings.showWordCount) {
+				statusText += `W: ${wordCount.toLocaleString()} `;
+			}
+			if (this.settings.showCharCount) {
+				statusText += `Ch: ${charCount.toLocaleString()}`;
+			}
+
+			this.statusBarItemEl.setText(statusText.trim());
 
 			// Add tooltip with additional details
 			this.statusBarItemEl.setAttribute(
