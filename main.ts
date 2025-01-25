@@ -61,6 +61,13 @@ export default class StatBarPlugin extends Plugin {
 			})
 		);
 
+		// Register event handler for active leaf changes
+		this.registerEvent(
+			this.app.workspace.on("active-leaf-change", (leaf) => {
+				this.updateWordCount(); // Update word count on active leaf change
+			})
+		);
+
 		// Register event handler for editor changes
 		this.registerEvent(
 			this.app.workspace.on("editor-change", () => {
@@ -135,7 +142,13 @@ export default class StatBarPlugin extends Plugin {
 			.replace(/\s+/g, " ") // Normalize whitespace
 			.trim();
 
+		console.log("Clean text:", cleanText); // Debugging line
+
 		const words = cleanText.split(/\s+/).filter((word) => word.length > 0);
+
+		console.log("Words array:", words); // Debugging line
+		console.log("Word count:", words.length); // Debugging line
+
 		return words.length;
 	}
 
