@@ -121,9 +121,9 @@ export default class StatBarPlugin extends Plugin {
 			// Add tooltip with additional details
 			this.statusBarItemEl.setAttribute(
 				"aria-label",
-				`Words: ${wordCount.toLocaleString()} ` +
-					`Characters: ${charCount.toLocaleString()} (${charNoSpaces.toLocaleString()} no spaces) ` +
-					`Estimated Read Time: ${readTime}`
+				`Words: ${wordCount.toLocaleString()} \n` +
+					`Characters: ${charCount.toLocaleString()} (${charNoSpaces.toLocaleString()} no spaces) \n` +
+					`Estimated Read Time: ${readTime} minutes`
 			);
 		} else {
 			this.statusBarItemEl.setText("");
