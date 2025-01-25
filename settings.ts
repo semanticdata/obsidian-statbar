@@ -14,6 +14,9 @@ export class SampleSettingTab extends PluginSettingTab {
 
 		containerEl.empty();
 
+		// Section for Toggles
+		containerEl.createEl("h2", { text: "Display Options" });
+
 		new Setting(containerEl)
 			.setName("Show Word Count")
 			.setDesc("Toggle to display the word count in the status bar.")
@@ -35,6 +38,35 @@ export class SampleSettingTab extends PluginSettingTab {
 					.setValue(this.plugin.settings.showCharCount)
 					.onChange(async (value) => {
 						this.plugin.settings.showCharCount = value;
+						await this.plugin.saveSettings();
+						this.plugin.updateWordCount(); // Update display immediately
+					})
+			);
+
+		// Section for Custom Labels
+		containerEl.createEl("h2", { text: "Custom Labels" });
+
+		new Setting(containerEl)
+			.setName("Word Count Label")
+			.setDesc("Customize the label for the word count.")
+			.addText((text) =>
+				text
+					.setValue(this.plugin.settings.wordLabel)
+					.onChange(async (value) => {
+						this.plugin.settings.wordLabel = value;
+						await this.plugin.saveSettings();
+						this.plugin.updateWordCount(); // Update display immediately
+					})
+			);
+
+		new Setting(containerEl)
+			.setName("Character Count Label")
+			.setDesc("Customize the label for the character count.")
+			.addText((text) =>
+				text
+					.setValue(this.plugin.settings.charLabel)
+					.onChange(async (value) => {
+						this.plugin.settings.charLabel = value;
 						await this.plugin.saveSettings();
 						this.plugin.updateWordCount(); // Update display immediately
 					})

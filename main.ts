@@ -16,11 +16,15 @@ import { SampleSettingTab } from "./settings"; // Import the new settings class
 interface MyPluginSettings {
 	showWordCount: boolean;
 	showCharCount: boolean;
+	wordLabel: string;
+	charLabel: string;
 }
 
 const DEFAULT_SETTINGS: MyPluginSettings = {
 	showWordCount: true,
 	showCharCount: true,
+	wordLabel: "W:",
+	charLabel: "Ch:",
 };
 
 export default class WordCountPlugin extends Plugin {
@@ -32,6 +36,8 @@ export default class WordCountPlugin extends Plugin {
 		this.settings = {
 			showWordCount: true,
 			showCharCount: true,
+			wordLabel: "W:",
+			charLabel: "Ch:",
 		};
 		this.statusBarItemEl = document.createElement("div");
 	}
@@ -74,10 +80,14 @@ export default class WordCountPlugin extends Plugin {
 
 			let statusText = "";
 			if (this.settings.showWordCount) {
-				statusText += `W: ${wordCount.toLocaleString()} `;
+				statusText += `${
+					this.settings.wordLabel
+				} ${wordCount.toLocaleString()} `;
 			}
 			if (this.settings.showCharCount) {
-				statusText += `Ch: ${charCount.toLocaleString()}`;
+				statusText += `${
+					this.settings.charLabel
+				} ${charCount.toLocaleString()}`;
 			}
 
 			this.statusBarItemEl.setText(statusText.trim());
