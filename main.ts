@@ -170,7 +170,7 @@ export default class StatBarPlugin extends Plugin {
 		// Final word count calculation
 		const words = cleanText.split(/\s+/).filter((word) => word.length > 0);
 		// console.log("Words array:", words); // Debugging line
-		console.log("Word count:", words.length); // Debugging line
+		// console.log("Word count:", words.length); // Debugging line
 
 		return words.length;
 	}
