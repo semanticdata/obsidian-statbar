@@ -132,21 +132,44 @@ export default class StatBarPlugin extends Plugin {
 	}
 
 	private getWordCount(text: string): number {
-		// Remove markdown syntax, URLs, and other special patterns
-		const cleanText = text
-			.replace(/\[\[([^\]]+)\]\]/g, "$1") // Remove wiki links but keep text
-			.replace(/\[([^\]]+)\]\([^\)]+\)/g, "$1") // Remove MD links but keep text
-			.replace(/`[^`]+`/g, "") // Remove inline code
-			.replace(/```[\s\S]*?```/g, "") // Remove code blocks
-			.replace(/[#*`_~>]/g, " ") // Remove remaining MD syntax
-			.replace(/\s+/g, " ") // Normalize whitespace
-			.trim();
+		// Log the raw input text before cleaning
+		// console.log("Raw input text:", text); // Debugging line
 
-		console.log("Clean text:", cleanText); // Debugging line
+		// Step 1: Remove wiki links
+		let cleanText = text.replace(/\[\[([^\]]+)\]\]/g, "$1");
+		// console.log("After removing wiki links:", cleanText); // Debugging line
 
+		// Step 2: Remove Markdown links
+		cleanText = cleanText.replace(/\[([^\]]+)\]\([^\)]+\)/g, "$1");
+		// console.log("After removing Markdown links:", cleanText); // Debugging line
+
+		// Step 3: Remove code blocks first
+		cleanText = cleanText.replace(/```[\s\S]*?```/g, ""); // Remove code blocks
+		// console.log("After removing code blocks:", cleanText); // Debugging line
+
+		// Step 4: Remove inline code
+		cleanText = cleanText.replace(/`[^`]+`/g, ""); // Remove inline code
+		// console.log("After removing inline code:", cleanText); // Debugging line
+
+		// Step 5: Remove empty lines
+		cleanText = cleanText.replace(/^\s*[\r\n]/gm, "");
+		// console.log("After removing empty lines:", cleanText); // Debugging line
+
+		// Step 6: Remove remaining Markdown syntax
+		cleanText = cleanText.replace(/[#*`_~>]/g, "");
+		// console.log("After removing remaining Markdown syntax:", cleanText); // Debugging line
+
+		// Step 7: Normalize whitespace
+		cleanText = cleanText.replace(/\s+/g, " ");
+		// console.log("After normalizing whitespace:", cleanText); // Debugging line
+
+		// Step 8: Trim leading and trailing whitespace
+		cleanText = cleanText.trim();
+		// console.log("After trimming whitespace:", cleanText); // Debugging line
+
+		// Final word count calculation
 		const words = cleanText.split(/\s+/).filter((word) => word.length > 0);
-
-		console.log("Words array:", words); // Debugging line
+		// console.log("Words array:", words); // Debugging line
 		console.log("Word count:", words.length); // Debugging line
 
 		return words.length;
