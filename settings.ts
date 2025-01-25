@@ -1,10 +1,10 @@
 import { App, PluginSettingTab, Setting } from "obsidian";
-import WordCountPlugin from "./main"; // Adjust the import path if necessary
+import StatBarPlugin from "./main"; // Adjust the import path if necessary
 
 export class SampleSettingTab extends PluginSettingTab {
-	plugin: WordCountPlugin;
+	plugin: StatBarPlugin;
 
-	constructor(app: App, plugin: WordCountPlugin) {
+	constructor(app: App, plugin: StatBarPlugin) {
 		super(app, plugin);
 		this.plugin = plugin;
 	}
@@ -43,6 +43,21 @@ export class SampleSettingTab extends PluginSettingTab {
 					})
 			);
 
+		new Setting(containerEl)
+			.setName("Show Read Time")
+			.setDesc(
+				"Toggle to display the estimated read time in the status bar."
+			)
+			.addToggle((toggle) =>
+				toggle
+					.setValue(this.plugin.settings.showReadTime)
+					.onChange(async (value) => {
+						this.plugin.settings.showReadTime = value;
+						await this.plugin.saveSettings();
+						this.plugin.updateWordCount(); // Update display immediately
+					})
+			);
+
 		// Section for Custom Labels
 		containerEl.createEl("h2", { text: "Custom Labels" });
 
@@ -69,6 +84,70 @@ export class SampleSettingTab extends PluginSettingTab {
 						this.plugin.settings.charLabel = value;
 						await this.plugin.saveSettings();
 						this.plugin.updateWordCount(); // Update display immediately
+					})
+			);
+
+		new Setting(containerEl)
+			.setName("Read Time Label")
+			.setDesc("Customize the label for the read time.")
+			.addText((text) =>
+				text
+					.setValue(this.plugin.settings.readTimeLabel)
+					.onChange(async (value) => {
+						this.plugin.settings.readTimeLabel = value;
+						await this.plugin.saveSettings();
+						this.plugin.updateWordCount(); // Update display immediately
+					})
+			);
+
+		new Setting(containerEl)
+			.setName("Separator Label")
+			.setDesc(
+				"Customize the label used as a separator between components."
+			)
+			.addText((text) =>
+				text
+					.setValue(this.plugin.settings.separatorLabel)
+					.onChange(async (value) => {
+						this.plugin.settings.separatorLabel = value;
+						await this.plugin.saveSettings();
+						this.plugin.updateWordCount(); // Update display immediately
+					})
+			);
+
+		new Setting(containerEl)
+			.setName("Read Time Label Position")
+			.setDesc(
+				"Choose whether the read time label appears before or after the time."
+			)
+			.addDropdown((dropdown) =>
+				dropdown
+					.addOption("before", "Before")
+					.addOption("after", "After")
+					.setValue(this.plugin.settings.readTimeLabelPosition)
+					.onChange(async (value) => {
+						this.plugin.settings.readTimeLabelPosition = value as
+							| "before"
+							| "after";
+						await this.plugin.saveSettings();
+						this.plugin.updateWordCount(); // Update display immediately
+					})
+			);
+
+		// New setting for custom words per minute
+		new Setting(containerEl)
+			.setName("Words Per Minute")
+			.setDesc("Customize the average reading speed in words per minute.")
+			.addText((text) =>
+				text
+					.setValue(this.plugin.settings.wordsPerMinute.toString())
+					.onChange(async (value) => {
+						const wpm = parseInt(value);
+						if (!isNaN(wpm) && wpm > 0) {
+							this.plugin.settings.wordsPerMinute = wpm;
+							await this.plugin.saveSettings();
+							this.plugin.updateWordCount(); // Update display immediately
+						}
 					})
 			);
 	}
