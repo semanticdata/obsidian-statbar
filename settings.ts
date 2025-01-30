@@ -58,6 +58,19 @@ export class StatBarSettingTab extends PluginSettingTab {
 					})
 			);
 
+		new Setting(containerEl)
+			.setName("Show Last Saved Time")
+			.setDesc("Toggle to display the last saved time in the status bar.")
+			.addToggle((toggle) =>
+				toggle
+					.setValue(this.plugin.settings.showLastSavedTime)
+					.onChange(async (value) => {
+						this.plugin.settings.showLastSavedTime = value;
+						await this.plugin.saveSettings();
+						this.plugin.updateLastSavedTime(); // Update display immediately
+					})
+			);
+
 		// Section for Custom Labels
 		containerEl.createEl("h2", { text: "Custom Labels" });
 
@@ -148,6 +161,21 @@ export class StatBarSettingTab extends PluginSettingTab {
 							await this.plugin.saveSettings();
 							this.plugin.updateWordCount(); // Update display immediately
 						}
+					})
+			);
+
+		// New setting for last saved time label (optional)
+		new Setting(containerEl)
+			.setName("Last Saved Time Label")
+			.setDesc("Customize the label for the last saved time.")
+			.addText((text) =>
+				text
+					.setValue("Last Saved:") // Default label
+					.onChange(async (value) => {
+						// You can store this value in settings if needed
+						// this.plugin.settings.lastSavedTimeLabel = value;
+						// await this.plugin.saveSettings();
+						// this.plugin.updateLastSavedTime(); // Update display immediately
 					})
 			);
 	}

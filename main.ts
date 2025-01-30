@@ -11,6 +11,7 @@ interface MyPluginSettings {
 	readTimeLabelPosition: "before" | "after";
 	separatorLabel: string;
 	wordsPerMinute: number;
+	showLastSavedTime: boolean;
 }
 
 const DEFAULT_SETTINGS: MyPluginSettings = {
@@ -23,11 +24,13 @@ const DEFAULT_SETTINGS: MyPluginSettings = {
 	readTimeLabelPosition: "after",
 	separatorLabel: "|",
 	wordsPerMinute: 200,
+	showLastSavedTime: true,
 };
 
 export default class StatBarPlugin extends Plugin {
 	settings!: MyPluginSettings; // Use definite assignment assertion
 	statusBarItemEl!: HTMLElement; // Use definite assignment assertion
+	lastSavedTimeEl!: HTMLElement; // New property for last saved time display
 
 	constructor(app: App, manifest: PluginManifest) {
 		super(app, manifest);
@@ -41,6 +44,7 @@ export default class StatBarPlugin extends Plugin {
 			readTimeLabelPosition: "after",
 			separatorLabel: "|",
 			wordsPerMinute: 200,
+			showLastSavedTime: true,
 		};
 		this.statusBarItemEl = document.createElement("div"); // Initialize with a default HTMLElement
 	}
@@ -72,6 +76,17 @@ export default class StatBarPlugin extends Plugin {
 		this.registerEvent(
 			this.app.workspace.on("editor-change", () => {
 				this.updateWordCount();
+			})
+		);
+
+		// Create last saved time display
+		this.lastSavedTimeEl = this.addStatusBarItem();
+		this.updateLastSavedTime(); // Initial update
+
+		// Register event handler for editor changes
+		this.registerEvent(
+			this.app.workspace.on("editor-change", () => {
+				this.updateLastSavedTime(); // Update last saved time on editor change
 			})
 		);
 
@@ -184,6 +199,16 @@ export default class StatBarPlugin extends Plugin {
 		const seconds = totalSeconds % 60;
 
 		return `${minutes}:${seconds.toString().padStart(2, "0")}`; // Format as "MM:SS"
+	}
+
+	public updateLastSavedTime() {
+		if (this.settings.showLastSavedTime) {
+			const now = new Date();
+			const formattedTime = now.toLocaleTimeString(); // Format the time as needed
+			this.lastSavedTimeEl.setText(`Last Saved: ${formattedTime}`);
+		} else {
+			this.lastSavedTimeEl.setText("");
+		}
 	}
 
 	async loadSettings() {
