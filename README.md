@@ -4,16 +4,16 @@ StatBar is an Obsidian plugin that adds a word and character counter to the stat
 
 ## ✨ Features
 
--   Displays a live word count in the status bar, updating in real-time as you type
+-   Displays a live word count in the status bar
 -   Shows character count alongside word count, including an option to display character count without spaces
 -   Automatically updates as you type, ensuring you always have the latest counts
 -   Ignores Markdown syntax when counting words, providing accurate results for your content
--   Works with any Markdown file in your vault, making it versatile for all your notes
--   Displays character count without spaces in a tooltip on hover for quick reference
--   Customizable labels for word and character count, allowing you to personalize your status bar
--   Toggleable display of word and character count, giving you control over what information is shown
--   New feature: Estimated read time calculation based on your word count, displayed in the status bar
--   New feature: Customizable read time label and position, allowing you to choose how it appears alongside your counts
+-   Customizable labels allowing you to personalize your status bar
+-   Toggleable components, giving you control over what information is shown:
+    -   Word count
+    -   Character count
+    -   Estimated read time
+    -   Last saved time
 
 ## 📦 Installation (_NOT AVAILABLE IN THE COMMUNITY PLUGINS YET!_)
 
