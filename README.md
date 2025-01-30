@@ -2,11 +2,11 @@
 
 StatBar is an Obsidian plugin that adds a word and character counter to the status bar in Obsidian. It updates automatically as you type and intelligently ignores Markdown syntax when counting words, providing a seamless writing experience.
 
-| Description |             Screenshots             |
-| ----------- | :---------------------------------: |
+| Description |                         Screenshots |
+| ----------- | ----------------------------------: |
 | Default     | ![screenshot-1](./screenshot-1.png) |
-| Custom      | ![screenshot-2](./screenshot-2.png) |
 | Last Saved  | ![screenshot-3](./screenshot-3.png) |
+| Custom      | ![screenshot-2](./screenshot-2.png) |
 
 ## ✨ Features
 
@@ -43,12 +43,6 @@ StatBar is an Obsidian plugin that adds a word and character counter to the stat
 2. Copy `main.js`, `settings.ts`, `manifest.json`, and `styles.css` to the new folder
 3. Reload Obsidian to load the plugin
 
-## 📜 License
-
-The code in this repository is available under the [MIT License](LICENSE).
-
----
-
 ## Releasing new releases
 
 -   Update your `manifest.json` with your new version number, such as `1.0.1`, and the minimum Obsidian version required for your latest release.
@@ -70,3 +64,7 @@ The code in this repository is available under the [MIT License](LICENSE).
 ## API Documentation
 
 See https://github.com/obsidianmd/obsidian-api
+
+## 📜 License
+
+The code in this repository is available under the [MIT License](LICENSE).
