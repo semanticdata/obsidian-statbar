@@ -1,9 +1,9 @@
 {
-	"id": "obsidian-statbar",
+	"id": "statbar",
 	"name": "StatBar",
 	"version": "1.0.0",
 	"minAppVersion": "0.15.0",
-	"description": "Adds a word and character counter to the status bar in Obsidian. It updates automatically as you type and intelligently ignores Markdown syntax when counting words, providing a seamless writing experience.",
+	"description": "Adds a word and character counter to the status bar. It updates automatically as you type and intelligently ignores Markdown syntax when counting words, providing a seamless writing experience.",
 	"author": "Miguel Pimentel",
 	"authorUrl": "https://github.com/semanticdata",
 	"fundingUrl": "https://github.com/sponsors/semanticdata",
