@@ -140,7 +140,8 @@ export default class StatBarPlugin extends Plugin {
 		// console.log("After removing wiki links:", cleanText); // Debugging line
 
 		// Step 2: Remove Markdown links
-		cleanText = cleanText.replace(/\[([^\]]+)\]\([^\)]+\)/g, "$1");
+		// cleanText = cleanText.replace(/\[([^\]]+)\]\([^\)]+\)/g, "$1"); // Remove Markdown links // Failed ESLint
+		cleanText = cleanText.replace(/\[([^\]]+)\]\([^)]+\)/g, "$1"); // Remove Markdown links
 		// console.log("After removing Markdown links:", cleanText); // Debugging line
 
 		// Step 3: Remove code blocks first
