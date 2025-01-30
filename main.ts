@@ -1,5 +1,5 @@
 import { App, MarkdownView, Plugin, PluginManifest } from "obsidian";
-import { SampleSettingTab } from "./settings";
+import { StatBarSettingTab } from "./settings";
 
 interface MyPluginSettings {
 	showWordCount: boolean;
@@ -76,7 +76,7 @@ export default class StatBarPlugin extends Plugin {
 		);
 
 		// Add settings tab
-		this.addSettingTab(new SampleSettingTab(this.app, this));
+		this.addSettingTab(new StatBarSettingTab(this.app, this));
 	}
 
 	public updateWordCount() {

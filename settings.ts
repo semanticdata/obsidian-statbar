@@ -1,7 +1,7 @@
 import { App, PluginSettingTab, Setting } from "obsidian";
 import StatBarPlugin from "./main"; // Adjust the import path if necessary
 
-export class SampleSettingTab extends PluginSettingTab {
+export class StatBarSettingTab extends PluginSettingTab {
 	plugin: StatBarPlugin;
 
 	constructor(app: App, plugin: StatBarPlugin) {
