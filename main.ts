@@ -97,18 +97,18 @@ export default class StatBarPlugin extends Plugin {
 			if (this.settings.showWordCount) {
 				statusText += `${
 					this.settings.wordLabel
-				} ${wordCount.toLocaleString()} ${
-					this.settings.separatorLabel
-				} `;
+				} ${wordCount.toLocaleString()}`;
 			}
 			if (this.settings.showCharCount) {
+				if (statusText)
+					statusText += ` ${this.settings.separatorLabel} `;
 				statusText += `${
 					this.settings.charLabel
-				} ${charCount.toLocaleString()} ${
-					this.settings.separatorLabel
-				} `;
+				} ${charCount.toLocaleString()}`;
 			}
 			if (this.settings.showReadTime) {
+				if (statusText)
+					statusText += ` ${this.settings.separatorLabel} `;
 				if (this.settings.readTimeLabelPosition === "before") {
 					statusText += `${this.settings.readTimeLabel} ${readTime}`;
 				} else {
