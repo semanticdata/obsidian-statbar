@@ -15,7 +15,7 @@ export class SampleSettingTab extends PluginSettingTab {
 		containerEl.empty();
 
 		// Section for Toggles
-		containerEl.createEl("h2", { text: "Display Options" });
+		// containerEl.createEl("h2", { text: "Display Options" });
 
 		new Setting(containerEl)
 			.setName("Show Word Count")
