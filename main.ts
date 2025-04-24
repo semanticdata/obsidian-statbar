@@ -9,18 +9,7 @@ export default class StatBarPlugin extends Plugin {
 
 	constructor(app: App, manifest: PluginManifest) {
 		super(app, manifest);
-		this.settings = {
-			showWordCount: true,
-			showCharCount: true,
-			wordLabel: "W:",
-			charLabel: "Ch:",
-			showReadTime: true,
-			readTimeLabel: "Read Time:",
-			readTimeLabelPosition: "after",
-			separatorLabel: "|",
-			wordsPerMinute: 200,
-			showLastSavedTime: true,
-		};
+		this.settings = { ...DEFAULT_SETTINGS };
 		this.statusBarItemEl = document.createElement("div"); // Initialize with a default HTMLElement
 	}
 

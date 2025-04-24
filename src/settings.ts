@@ -11,19 +11,21 @@ export interface MyPluginSettings {
 	separatorLabel: string;
 	wordsPerMinute: number;
 	showLastSavedTime: boolean;
+	lastSavedTimeLabel: string;
 }
 
 export const DEFAULT_SETTINGS: MyPluginSettings = {
 	showWordCount: true,
 	showCharCount: true,
-	showReadTime: true,
-	wordLabel: "W:",
-	charLabel: "Ch:",
+	showReadTime: false,
+	showLastSavedTime: false,
+	wordLabel: "Words:",
+	charLabel: "Characters:",
 	readTimeLabel: "min read",
 	readTimeLabelPosition: "after",
-	separatorLabel: "|",
+	lastSavedTimeLabel: "Last saved:",
+	separatorLabel: "or",
 	wordsPerMinute: 200,
-	showLastSavedTime: true,
 };
 
 import StatBarPlugin from "../main"; // Fixed import path to parent directory
@@ -42,8 +44,6 @@ export class StatBarSettingTab extends PluginSettingTab {
 		containerEl.empty();
 
 		// Section for Toggles
-		// containerEl.createEl("h2", { text: "Display Options" });
-
 		new Setting(containerEl)
 			.setName("Show Word Count")
 			.setDesc("Toggle to display the word count in the status bar.")
@@ -197,12 +197,11 @@ export class StatBarSettingTab extends PluginSettingTab {
 			.setDesc("Customize the label for the last saved time.")
 			.addText((text) =>
 				text
-					.setValue("Last Saved:") // Default label
+					.setValue(this.plugin.settings.lastSavedTimeLabel)
 					.onChange(async (value) => {
-						// You can store this value in settings if needed
-						// this.plugin.settings.lastSavedTimeLabel = value;
-						// await this.plugin.saveSettings();
-						// this.plugin.updateLastSavedTime(); // Update display immediately
+						this.plugin.settings.lastSavedTimeLabel = value;
+						await this.plugin.saveSettings();
+						this.plugin.updateLastSavedTime(); // Update display immediately
 					})
 			);
 	}
