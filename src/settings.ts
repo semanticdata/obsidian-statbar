@@ -1,5 +1,32 @@
 import { App, PluginSettingTab, Setting } from "obsidian";
-import StatBarPlugin from "./main"; // Adjust the import path if necessary
+
+export interface MyPluginSettings {
+	showWordCount: boolean;
+	showCharCount: boolean;
+	wordLabel: string;
+	charLabel: string;
+	showReadTime: boolean;
+	readTimeLabel: string;
+	readTimeLabelPosition: "before" | "after";
+	separatorLabel: string;
+	wordsPerMinute: number;
+	showLastSavedTime: boolean;
+}
+
+export const DEFAULT_SETTINGS: MyPluginSettings = {
+	showWordCount: true,
+	showCharCount: true,
+	showReadTime: true,
+	wordLabel: "W:",
+	charLabel: "Ch:",
+	readTimeLabel: "min read",
+	readTimeLabelPosition: "after",
+	separatorLabel: "|",
+	wordsPerMinute: 200,
+	showLastSavedTime: true,
+};
+
+import StatBarPlugin from "../main"; // Fixed import path to parent directory
 
 export class StatBarSettingTab extends PluginSettingTab {
 	plugin: StatBarPlugin;

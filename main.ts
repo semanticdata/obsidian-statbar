@@ -1,31 +1,6 @@
 import { App, MarkdownView, Plugin, PluginManifest } from "obsidian";
-import { StatBarSettingTab } from "./settings";
-
-interface MyPluginSettings {
-	showWordCount: boolean;
-	showCharCount: boolean;
-	wordLabel: string;
-	charLabel: string;
-	showReadTime: boolean;
-	readTimeLabel: string;
-	readTimeLabelPosition: "before" | "after";
-	separatorLabel: string;
-	wordsPerMinute: number;
-	showLastSavedTime: boolean;
-}
-
-const DEFAULT_SETTINGS: MyPluginSettings = {
-	showWordCount: true,
-	showCharCount: true,
-	showReadTime: true,
-	wordLabel: "W:",
-	charLabel: "Ch:",
-	readTimeLabel: "min read",
-	readTimeLabelPosition: "after",
-	separatorLabel: "|",
-	wordsPerMinute: 200,
-	showLastSavedTime: true,
-};
+import { StatBarSettingTab, MyPluginSettings, DEFAULT_SETTINGS } from "./src/settings";
+import { debugLog } from "./src/debug";
 
 export default class StatBarPlugin extends Plugin {
 	settings!: MyPluginSettings; // Use definite assignment assertion
@@ -110,16 +85,14 @@ export default class StatBarPlugin extends Plugin {
 
 			let statusText = "";
 			if (this.settings.showWordCount) {
-				statusText += `${
-					this.settings.wordLabel
-				} ${wordCount.toLocaleString()}`;
+				statusText += `${this.settings.wordLabel
+					} ${wordCount.toLocaleString()}`;
 			}
 			if (this.settings.showCharCount) {
 				if (statusText)
 					statusText += ` ${this.settings.separatorLabel} `;
-				statusText += `${
-					this.settings.charLabel
-				} ${charCount.toLocaleString()}`;
+				statusText += `${this.settings.charLabel
+					} ${charCount.toLocaleString()}`;
 			}
 			if (this.settings.showReadTime) {
 				if (statusText)
@@ -137,8 +110,8 @@ export default class StatBarPlugin extends Plugin {
 			this.statusBarItemEl.setAttribute(
 				"aria-label",
 				`Words: ${wordCount.toLocaleString()} \n` +
-					`Characters: ${charCount.toLocaleString()} (${charNoSpaces.toLocaleString()} no spaces) \n` +
-					`Estimated Read Time: ${readTime} minutes`
+				`Characters: ${charCount.toLocaleString()} (${charNoSpaces.toLocaleString()} no spaces) \n` +
+				`Estimated Read Time: ${readTime} minutes`
 			);
 		} else {
 			this.statusBarItemEl.setText("");
@@ -147,46 +120,45 @@ export default class StatBarPlugin extends Plugin {
 	}
 
 	private getWordCount(text: string): number {
-		// Log the raw input text before cleaning
-		// console.log("Raw input text:", text); // Debugging line
+		debugLog("Raw input text:", text);
 
 		// Step 1: Remove wiki links
 		let cleanText = text.replace(/\[\[([^\]]+)\]\]/g, "$1");
-		// console.log("After removing wiki links:", cleanText); // Debugging line
+		debugLog("After removing wiki links:", cleanText);
 
 		// Step 2: Remove Markdown links
 		// cleanText = cleanText.replace(/\[([^\]]+)\]\([^\)]+\)/g, "$1"); // Remove Markdown links // Failed ESLint
-		cleanText = cleanText.replace(/\[([^\]]+)\]\([^)]+\)/g, "$1"); // Remove Markdown links
-		// console.log("After removing Markdown links:", cleanText); // Debugging line
+		cleanText = cleanText.replace(/\[([^\]]+)]\([^)]+\)/g, "$1"); // Remove Markdown links
+		debugLog("After removing Markdown links:", cleanText);
 
 		// Step 3: Remove code blocks first
 		cleanText = cleanText.replace(/```[\s\S]*?```/g, ""); // Remove code blocks
-		// console.log("After removing code blocks:", cleanText); // Debugging line
+		debugLog("After removing code blocks:", cleanText);
 
 		// Step 4: Remove inline code
 		cleanText = cleanText.replace(/`[^`]+`/g, ""); // Remove inline code
-		// console.log("After removing inline code:", cleanText); // Debugging line
+		debugLog("After removing inline code:", cleanText);
 
 		// Step 5: Remove empty lines
 		cleanText = cleanText.replace(/^\s*[\r\n]/gm, "");
-		// console.log("After removing empty lines:", cleanText); // Debugging line
+		debugLog("After removing empty lines:", cleanText);
 
 		// Step 6: Remove remaining Markdown syntax
 		cleanText = cleanText.replace(/[#*`_~>]/g, "");
-		// console.log("After removing remaining Markdown syntax:", cleanText); // Debugging line
+		debugLog("After removing remaining Markdown syntax:", cleanText);
 
 		// Step 7: Normalize whitespace
 		cleanText = cleanText.replace(/\s+/g, " ");
-		// console.log("After normalizing whitespace:", cleanText); // Debugging line
+		debugLog("After normalizing whitespace:", cleanText);
 
 		// Step 8: Trim leading and trailing whitespace
 		cleanText = cleanText.trim();
-		// console.log("After trimming whitespace:", cleanText); // Debugging line
+		debugLog("After trimming whitespace:", cleanText);
 
 		// Final word count calculation
 		const words = cleanText.split(/\s+/).filter((word) => word.length > 0);
-		// console.log("Words array:", words); // Debugging line
-		// console.log("Word count:", words.length); // Debugging line
+		debugLog("Words array:", words);
+		debugLog("Word count:", words.length);
 
 		return words.length;
 	}
