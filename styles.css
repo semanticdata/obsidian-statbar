@@ -1,8 +1,39 @@
-/*
+/* StatBar stats element */
+.statbar-stats {
+    padding: 4px 8px;
+    border-radius: 4px;
+    transition: background-color 0.3s ease, color 0.3s ease;
+    cursor: pointer;
+    font-variant-numeric: tabular-nums;
+}
 
-This CSS file will be included with your plugin, and
-available in the app when your plugin is enabled.
+/* StatBar time element */
+.statbar-time {
+    padding: 4px 8px;
+    border-radius: 4px;
+    transition: background-color 0.3s ease, color 0.3s ease;
+    cursor: pointer;
+    font-style: italic;
+    opacity: 0.8;
+}
 
-If your plugin does not need CSS, delete this file.
+/* Selection stats active state */
+.statbar-stats[aria-label*="Selection Stats"] {
+    background-color: var(--interactive-accent);
+    color: var(--text-on-accent);
+}
 
-*/
+/* Hover states */
+.statbar-stats:not([aria-label*="Selection Stats"]):hover {
+    background-color: var(--interactive-accent-hover);
+    color: var(--text-on-accent);
+}
+
+.statbar-stats[aria-label*="Selection Stats"]:hover {
+    background-color: var(--background-modifier-active-hover);
+}
+
+.statbar-time:hover {
+    background-color: var(--interactive-hover);
+    opacity: 1;
+}

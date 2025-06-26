@@ -33,6 +33,7 @@ export default class StatBarPlugin extends Plugin {
 
 		// Create status bar item
 		this.statusBarItemEl = this.addStatusBarItem();
+		this.statusBarItemEl.addClass('statbar-stats');
 
 		// Initial update
 		this.updateWordCount();
@@ -78,6 +79,7 @@ export default class StatBarPlugin extends Plugin {
 
 		// Create last saved time display
 		this.lastSavedTimeEl = this.addStatusBarItem();
+		this.lastSavedTimeEl.addClass('statbar-time');
 		this.updateLastSavedTime(); // Initial update
 
 		// Register event handler for file save events (proper save event listening)
