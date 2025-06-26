@@ -1,4 +1,6 @@
-import { DEFAULT_SETTINGS, MyPluginSettings } from '../src/settings';
+import { DEFAULT_SETTINGS, MyPluginSettings, StatBarSettingTab } from '../src/settings';
+import { App, PluginSettingTab, Setting } from 'obsidian';
+import StatBarPlugin from '../main';
 
 describe('Settings Tests', () => {
   describe('DEFAULT_SETTINGS', () => {
@@ -14,6 +16,100 @@ describe('Settings Tests', () => {
       expect(DEFAULT_SETTINGS.lastSavedTimeLabel).toBe('Last saved:');
       expect(DEFAULT_SETTINGS.separatorLabel).toBe('or');
       expect(DEFAULT_SETTINGS.wordsPerMinute).toBe(200);
+    });
+  });
+
+  describe('StatBarSettingTab', () => {
+    let settingTab: StatBarSettingTab;
+    let mockApp: any;
+    let mockPlugin: any;
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+
+      mockApp = {
+        workspace: {
+          on: jest.fn(),
+          off: jest.fn()
+        }
+      };
+
+      mockPlugin = {
+        settings: { ...DEFAULT_SETTINGS },
+        saveSettings: jest.fn().mockResolvedValue(undefined),
+        updateWordCount: jest.fn(),
+        updateLastSavedTime: jest.fn()
+      };
+
+      settingTab = new StatBarSettingTab(mockApp, mockPlugin);
+    });
+
+    test('should create instance correctly', () => {
+      expect(settingTab).toBeInstanceOf(StatBarSettingTab);
+      expect(settingTab.plugin).toBe(mockPlugin);
+      expect(settingTab.plugin.settings).toEqual(DEFAULT_SETTINGS);
+    });
+
+    test('should inherit from PluginSettingTab', () => {
+      expect(settingTab).toBeInstanceOf(PluginSettingTab);
+    });
+
+    test('should have access to plugin settings', () => {
+      expect(settingTab.plugin.settings.showWordCount).toBe(true);
+      expect(settingTab.plugin.settings.showCharCount).toBe(true);
+      expect(settingTab.plugin.settings.showReadTime).toBe(false);
+      expect(settingTab.plugin.settings.showLastSavedTime).toBe(false);
+      expect(settingTab.plugin.settings.wordsPerMinute).toBe(200);
+    });
+
+    test('should have display method', () => {
+      expect(typeof settingTab.display).toBe('function');
+    });
+
+    test('should have plugin reference with required methods', () => {
+      expect(typeof settingTab.plugin.saveSettings).toBe('function');
+      expect(typeof settingTab.plugin.updateWordCount).toBe('function');
+      expect(typeof settingTab.plugin.updateLastSavedTime).toBe('function');
+    });
+
+    test('should work with different plugin settings', () => {
+      const customSettings = {
+        ...DEFAULT_SETTINGS,
+        showWordCount: false,
+        wordLabel: 'Custom Words:',
+        wordsPerMinute: 250
+      };
+
+      const customPlugin = {
+        settings: customSettings,
+        saveSettings: jest.fn(),
+        updateWordCount: jest.fn(),
+        updateLastSavedTime: jest.fn()
+      };
+
+      const customSettingTab = new StatBarSettingTab(mockApp, customPlugin as any);
+
+      expect(customSettingTab.plugin.settings.showWordCount).toBe(false);
+      expect(customSettingTab.plugin.settings.wordLabel).toBe('Custom Words:');
+      expect(customSettingTab.plugin.settings.wordsPerMinute).toBe(250);
+    });
+  });
+
+  describe('Settings integration with StatBarSettingTab', () => {
+    test('should work with real settings object', () => {
+      const mockApp = { workspace: { on: jest.fn() } };
+      const mockPlugin = {
+        settings: { ...DEFAULT_SETTINGS },
+        saveSettings: jest.fn(),
+        updateWordCount: jest.fn(),
+        updateLastSavedTime: jest.fn()
+      };
+
+      const settingTab = new StatBarSettingTab(mockApp as any, mockPlugin as any);
+
+      expect(settingTab.plugin.settings).toEqual(DEFAULT_SETTINGS);
+      expect(settingTab.plugin.settings.showWordCount).toBe(true);
+      expect(settingTab.plugin.settings.wordsPerMinute).toBe(200);
     });
 
     test('should have all required properties', () => {
