@@ -29,12 +29,13 @@ export class Plugin {
   }
 
   addStatusBarItem() {
-    return {
-      setText: jest.fn(),
-      setTitle: jest.fn(),
-      setAttribute: jest.fn(),
-      remove: jest.fn()
-    };
+    const mockElement = document.createElement('div');
+    // Add Obsidian-specific methods
+    (mockElement as any).setText = jest.fn();
+    (mockElement as any).setTitle = jest.fn();
+    (mockElement as any).addClass = jest.fn();
+    (mockElement as any).removeClass = jest.fn();
+    return mockElement;
   }
 
   addSettingTab() { }
@@ -89,6 +90,23 @@ export class Setting {
   addSlider = jest.fn().mockReturnThis();
   addDropdown = jest.fn().mockReturnThis();
   addButton = jest.fn().mockReturnThis();
+}
+
+export class Modal {
+  app: App;
+  containerEl: HTMLElement;
+  contentEl: HTMLElement;
+
+  constructor(app: App) {
+    this.app = app;
+    this.containerEl = document.createElement('div');
+    this.contentEl = document.createElement('div');
+  }
+
+  open = jest.fn();
+  close = jest.fn();
+  onOpen = jest.fn();
+  onClose = jest.fn();
 }
 
 export interface PluginManifest {

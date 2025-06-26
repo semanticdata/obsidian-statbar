@@ -13,12 +13,13 @@ describe('StatBarPlugin Integration Tests', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    mockStatusBarItem = {
-      setText: jest.fn(),
-      setTitle: jest.fn(),
-      setAttribute: jest.fn(),
-      remove: jest.fn()
-    };
+    mockStatusBarItem = document.createElement('div');
+    (mockStatusBarItem as any).setText = jest.fn();
+    (mockStatusBarItem as any).setTitle = jest.fn();
+    (mockStatusBarItem as any).addClass = jest.fn();
+    (mockStatusBarItem as any).removeClass = jest.fn();
+    (mockStatusBarItem as any).setAttribute = jest.fn();
+    (mockStatusBarItem as any).remove = jest.fn();
 
     mockApp = {
       workspace: {

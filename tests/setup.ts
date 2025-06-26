@@ -36,11 +36,14 @@ class MockPlugin {
     this.manifest = { id: 'test-plugin', name: 'Test Plugin' };
   }
 
-  addStatusBarItem = jest.fn(() => ({
-    setText: jest.fn(),
-    setTitle: jest.fn(),
-    remove: jest.fn()
-  }));
+  addStatusBarItem = jest.fn(() => {
+    const mockElement = document.createElement('div');
+    (mockElement as any).setText = jest.fn();
+    (mockElement as any).setTitle = jest.fn();
+    (mockElement as any).addClass = jest.fn();
+    (mockElement as any).removeClass = jest.fn();
+    return mockElement;
+  });
 
   addSettingTab = jest.fn();
   loadData = jest.fn().mockResolvedValue({});
