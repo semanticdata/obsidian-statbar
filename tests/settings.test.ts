@@ -162,7 +162,9 @@ describe('Settings Tests', () => {
         separatorLabel: '|',
         wordsPerMinute: 150,
         showLastSavedTime: true,
-        lastSavedTimeLabel: 'Saved:'
+        lastSavedTimeLabel: 'Saved:',
+        showSelectionStats: true,
+        selectionPrefix: '[SELECTED]'
       };
 
       // Test that all properties are properly typed

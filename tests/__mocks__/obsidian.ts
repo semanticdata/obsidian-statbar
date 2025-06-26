@@ -43,6 +43,10 @@ export class Plugin {
     return eventRef;
   }
 
+  registerDomEvent(el: any, type: string, callback: any) {
+    return { el, type, callback };
+  }
+
   async loadData() {
     return {};
   }
@@ -106,7 +110,7 @@ export interface TFile {
 export interface Editor {
   getValue(): string;
   getSelection(): string;
-  getCursor(): any;
+  getCursor(string?: 'from' | 'to' | 'head' | 'anchor'): { line: number; ch: number };
   getLine(line: number): string;
 }
 

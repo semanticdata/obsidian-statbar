@@ -19,7 +19,10 @@ describe('StatBarPlugin Word Count Tests', () => {
         getActiveViewOfType: jest.fn(() => ({
           editor: {
             getValue: jest.fn(() => 'Sample text for testing'),
-            getSelection: jest.fn(() => '')
+            getSelection: jest.fn(() => ''),
+            getCursor: jest.fn((type?: string) => {
+              return { line: 0, ch: 0 };
+            })
           },
           getViewData: jest.fn(() => 'Sample text for testing')
         }))
@@ -41,6 +44,10 @@ describe('StatBarPlugin Word Count Tests', () => {
 
     plugin = new StatBarPlugin(mockApp, mockManifest);
     plugin.settings = { ...DEFAULT_SETTINGS };
+
+    // Mock plugin methods
+    plugin.registerEvent = jest.fn();
+    plugin.registerDomEvent = jest.fn();
   });
 
   describe('getWordCount', () => {

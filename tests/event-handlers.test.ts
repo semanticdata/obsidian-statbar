@@ -34,7 +34,11 @@ describe('StatBarPlugin Event Handler Tests', () => {
         getActiveViewOfType: jest.fn(() => ({
           editor: {
             getValue: jest.fn(() => 'Sample text for testing'),
-            getSelection: jest.fn(() => '')
+            getSelection: jest.fn(() => ''),
+            getCursor: jest.fn((type?: string) => {
+              // Mock cursor positions - same position means no selection
+              return { line: 0, ch: 0 };
+            })
           },
           getViewData: jest.fn(() => 'Sample text for testing')
         }))
@@ -73,6 +77,9 @@ describe('StatBarPlugin Event Handler Tests', () => {
 
     // Mock registerEvent method
     plugin.registerEvent = jest.fn();
+
+    // Mock registerDomEvent method
+    plugin.registerDomEvent = jest.fn();
   });
 
 

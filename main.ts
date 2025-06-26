@@ -7,6 +7,7 @@ interface DocumentStats {
 	charCount: number;
 	readTime: string;
 	isSelection?: boolean;
+	selectionPrefix?: string;
 }
 
 export default class StatBarPlugin extends Plugin {
@@ -18,6 +19,8 @@ export default class StatBarPlugin extends Plugin {
 	private debounceTimer: NodeJS.Timeout | null = null;
 	private lastContentHash = "";
 	private cachedStats: DocumentStats | null = null;
+	private lastSelectionHash = "";
+	private cachedSelectionStats: DocumentStats | null = null;
 
 	constructor(app: App, manifest: PluginManifest) {
 		super(app, manifest);
@@ -55,6 +58,24 @@ export default class StatBarPlugin extends Plugin {
 			})
 		);
 
+		// Register event listeners for selection changes
+		this.registerDomEvent(document, 'selectionchange', () => {
+			// Only update if we're in a markdown view
+			const activeView = this.app.workspace.getActiveViewOfType(MarkdownView);
+			if (activeView) {
+				this.updateWordCount();
+			}
+		});
+
+		// Also listen for mouse events that might change selection
+		this.registerDomEvent(document, 'mouseup', () => {
+			const activeView = this.app.workspace.getActiveViewOfType(MarkdownView);
+			if (activeView) {
+				// Small delay to ensure selection has been updated
+				setTimeout(() => this.updateWordCount(), 10);
+			}
+		});
+
 		// Create last saved time display
 		this.lastSavedTimeEl = this.addStatusBarItem();
 		this.updateLastSavedTime(); // Initial update
@@ -75,13 +96,21 @@ export default class StatBarPlugin extends Plugin {
 
 		if (activeView) {
 			const editor = activeView.editor;
-			const selectedText = editor.getSelection();
-			const text = selectedText || activeView.getViewData(); // Use selected text if available
-			const isSelection = selectedText.length > 0;
 
-			// Check cache first
+			// Check if there's an actual selection by comparing cursor positions
+			const fromCursor = editor.getCursor('from');
+			const toCursor = editor.getCursor('to');
+			const hasSelection = fromCursor.line !== toCursor.line || fromCursor.ch !== toCursor.ch;
+
+			const selectedText = hasSelection ? editor.getSelection() : '';
+			const text = selectedText || activeView.getViewData(); // Use selected text if available
+			const isSelection = hasSelection && selectedText.length > 0;
+
+			// Check cache first (separate caching for selection vs document)
 			const contentHash = this.getContentHash(text);
-			const cachedStats = this.getCachedStats(contentHash);
+			const cachedStats = isSelection ?
+				this.getCachedSelectionStats(contentHash) :
+				this.getCachedStats(contentHash);
 
 			let wordCount: number;
 			let readTime: string;
@@ -93,22 +122,31 @@ export default class StatBarPlugin extends Plugin {
 				wordCount = this.getWordCount(text);
 				readTime = this.calculateReadTime(wordCount);
 
-				// Cache the results
+				// Cache the results (separate caching for selection vs document)
 				const stats: DocumentStats = {
 					wordCount,
 					charCount: text.length,
 					readTime,
 					isSelection
 				};
-				this.setCachedStats(contentHash, stats);
+
+				if (isSelection) {
+					this.setCachedSelectionStats(contentHash, stats);
+				} else {
+					this.setCachedStats(contentHash, stats);
+				}
 			}
 
 			const charCount = text.length;
 			const charNoSpaces = text.replace(/\s/g, "").length;
 
+			// Add selection prefix if text is selected and setting is enabled
+			const selectionPrefix = (isSelection && this.settings.showSelectionStats) ?
+				`${this.settings.selectionPrefix} ` : "";
+
 			let statusText = "";
 			if (this.settings.showWordCount) {
-				statusText += `${this.settings.wordLabel
+				statusText += `${selectionPrefix}${this.settings.wordLabel
 					} ${wordCount.toLocaleString()}`;
 			}
 			if (this.settings.showCharCount) {
@@ -131,10 +169,17 @@ export default class StatBarPlugin extends Plugin {
 
 			// Add tooltip with additional details only if something is being displayed
 			if (statusText.trim()) {
+				const tooltipPrefix = (isSelection && this.settings.showSelectionStats) ?
+					"Selection Stats:\n" : "Document Stats:\n";
+				const scopeInfo = (isSelection && this.settings.showSelectionStats) ?
+					`Selected text (${selectedText.length} chars)\n` : "Full document\n";
+
 				this.statusBarItemEl.setAttribute(
 					"aria-label",
-					`Words: ${wordCount.toLocaleString()}·\n` +
-					`Characters: ${charCount.toLocaleString()} (${charNoSpaces.toLocaleString()} no spaces)·\n` +
+					tooltipPrefix +
+					scopeInfo +
+					`Words: ${wordCount.toLocaleString()}\n` +
+					`Characters: ${charCount.toLocaleString()} (${charNoSpaces.toLocaleString()} no spaces)\n` +
 					`Estimated Read Time: ${readTime} minutes`
 				);
 			} else {
@@ -236,5 +281,17 @@ export default class StatBarPlugin extends Plugin {
 	private setCachedStats(hash: string, stats: DocumentStats): void {
 		this.lastContentHash = hash;
 		this.cachedStats = stats;
+	}
+
+	private getCachedSelectionStats(hash: string): DocumentStats | null {
+		if (this.lastSelectionHash === hash && this.cachedSelectionStats) {
+			return this.cachedSelectionStats;
+		}
+		return null;
+	}
+
+	private setCachedSelectionStats(hash: string, stats: DocumentStats): void {
+		this.lastSelectionHash = hash;
+		this.cachedSelectionStats = stats;
 	}
 }

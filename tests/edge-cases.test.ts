@@ -60,6 +60,10 @@ describe('StatBarPlugin Edge Cases and Error Handling', () => {
 
     plugin.statusBarItemEl = mockStatusBarItem;
     plugin.lastSavedTimeEl = mockLastSavedTimeEl;
+
+    // Mock plugin methods
+    plugin.registerEvent = jest.fn();
+    plugin.registerDomEvent = jest.fn();
   });
 
   describe('updateWordCount edge cases', () => {
@@ -76,7 +80,10 @@ describe('StatBarPlugin Edge Cases and Error Handling', () => {
       mockApp.workspace.getActiveViewOfType.mockReturnValue({
         editor: {
           getSelection: jest.fn(() => ''),
-          getValue: jest.fn(() => 'test content')
+          getValue: jest.fn(() => 'test content'),
+          getCursor: jest.fn((type?: string) => {
+            return { line: 0, ch: 0 };
+          })
         },
         getViewData: jest.fn(() => 'test content')
       });
@@ -90,7 +97,13 @@ describe('StatBarPlugin Edge Cases and Error Handling', () => {
     test('should handle editor with selection', () => {
       const mockEditor = {
         getSelection: jest.fn(() => 'selected text'),
-        getValue: jest.fn(() => 'full document text')
+        getValue: jest.fn(() => 'full document text'),
+        getCursor: jest.fn((type?: string) => {
+          // Mock different cursor positions to simulate selection
+          if (type === 'from') return { line: 0, ch: 0 };
+          if (type === 'to') return { line: 0, ch: 13 }; // 'selected text' length
+          return { line: 0, ch: 0 };
+        })
       };
 
       mockApp.workspace.getActiveViewOfType.mockReturnValue({
@@ -100,14 +113,17 @@ describe('StatBarPlugin Edge Cases and Error Handling', () => {
 
       plugin.updateWordCount();
 
-      expect(mockEditor.getSelection).toHaveBeenCalled();
+      expect(mockEditor.getCursor).toHaveBeenCalled();
       expect(mockStatusBarItem.setText).toHaveBeenCalled();
     });
 
     test('should handle empty selection', () => {
       const mockEditor = {
         getSelection: jest.fn(() => ''),
-        getValue: jest.fn(() => 'full document text')
+        getValue: jest.fn(() => 'full document text'),
+        getCursor: jest.fn((type?: string) => {
+          return { line: 0, ch: 0 };
+        })
       };
 
       mockApp.workspace.getActiveViewOfType.mockReturnValue({
@@ -117,14 +133,20 @@ describe('StatBarPlugin Edge Cases and Error Handling', () => {
 
       plugin.updateWordCount();
 
-      expect(mockEditor.getSelection).toHaveBeenCalled();
+      expect(mockEditor.getCursor).toHaveBeenCalled();
       expect(mockStatusBarItem.setText).toHaveBeenCalled();
     });
 
     test('should display selection indicator when text is selected', () => {
       const mockEditor = {
         getSelection: jest.fn(() => 'selected text here'),
-        getValue: jest.fn(() => 'full document text')
+        getValue: jest.fn(() => 'full document text'),
+        getCursor: jest.fn((type?: string) => {
+          // Mock different cursor positions to simulate selection
+          if (type === 'from') return { line: 0, ch: 0 };
+          if (type === 'to') return { line: 0, ch: 18 }; // 'selected text here' length
+          return { line: 0, ch: 0 };
+        })
       };
 
       mockApp.workspace.getActiveViewOfType.mockReturnValue({
@@ -146,7 +168,10 @@ describe('StatBarPlugin Edge Cases and Error Handling', () => {
     test('should handle different separator labels', () => {
       const mockEditor = {
         getSelection: jest.fn(() => ''),
-        getValue: jest.fn(() => 'test content')
+        getValue: jest.fn(() => 'test content'),
+        getCursor: jest.fn((type?: string) => {
+          return { line: 0, ch: 0 };
+        })
       };
 
       mockApp.workspace.getActiveViewOfType.mockReturnValue({
@@ -167,7 +192,10 @@ describe('StatBarPlugin Edge Cases and Error Handling', () => {
     test('should handle read time display with before position', () => {
       const mockEditor = {
         getSelection: jest.fn(() => ''),
-        getValue: jest.fn(() => 'test content with multiple words here')
+        getValue: jest.fn(() => 'test content with multiple words here'),
+        getCursor: jest.fn((type?: string) => {
+          return { line: 0, ch: 0 };
+        })
       };
 
       mockApp.workspace.getActiveViewOfType.mockReturnValue({
@@ -188,7 +216,10 @@ describe('StatBarPlugin Edge Cases and Error Handling', () => {
     test('should handle read time display with after position', () => {
       const mockEditor = {
         getSelection: jest.fn(() => ''),
-        getValue: jest.fn(() => 'test content with multiple words here')
+        getValue: jest.fn(() => 'test content with multiple words here'),
+        getCursor: jest.fn((type?: string) => {
+          return { line: 0, ch: 0 };
+        })
       };
 
       mockApp.workspace.getActiveViewOfType.mockReturnValue({
@@ -209,7 +240,10 @@ describe('StatBarPlugin Edge Cases and Error Handling', () => {
     test('should handle all display options disabled', () => {
       const mockEditor = {
         getSelection: jest.fn(() => ''),
-        getValue: jest.fn(() => 'test content')
+        getValue: jest.fn(() => 'test content'),
+        getCursor: jest.fn((type?: string) => {
+          return { line: 0, ch: 0 };
+        })
       };
 
       mockApp.workspace.getActiveViewOfType.mockReturnValue({
@@ -345,7 +379,10 @@ describe('StatBarPlugin Edge Cases and Error Handling', () => {
     test('should set appropriate aria-label for word count display', () => {
       const mockEditor = {
         getSelection: jest.fn(() => ''),
-        getValue: jest.fn(() => 'test content here')
+        getValue: jest.fn(() => 'test content here'),
+        getCursor: jest.fn((type?: string) => {
+          return { line: 0, ch: 0 };
+        })
       };
 
       mockApp.workspace.getActiveViewOfType.mockReturnValue({

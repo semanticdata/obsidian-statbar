@@ -12,6 +12,8 @@ export interface MyPluginSettings {
 	wordsPerMinute: number;
 	showLastSavedTime: boolean;
 	lastSavedTimeLabel: string;
+	showSelectionStats: boolean;
+	selectionPrefix: string;
 }
 
 export const DEFAULT_SETTINGS: MyPluginSettings = {
@@ -26,6 +28,8 @@ export const DEFAULT_SETTINGS: MyPluginSettings = {
 	lastSavedTimeLabel: "Last saved:",
 	separatorLabel: "or",
 	wordsPerMinute: 200,
+	showSelectionStats: true,
+	selectionPrefix: "[SEL]",
 };
 
 import StatBarPlugin from "../main"; // Fixed import path to parent directory
@@ -95,6 +99,19 @@ export class StatBarSettingTab extends PluginSettingTab {
 						this.plugin.settings.showLastSavedTime = value;
 						await this.plugin.saveSettings();
 						this.plugin.updateLastSavedTime(); // Update display immediately
+					})
+			);
+
+		new Setting(containerEl)
+			.setName("Show Selection Stats")
+			.setDesc("Toggle to show different stats when text is selected.")
+			.addToggle((toggle) =>
+				toggle
+					.setValue(this.plugin.settings.showSelectionStats)
+					.onChange(async (value) => {
+						this.plugin.settings.showSelectionStats = value;
+						await this.plugin.saveSettings();
+						this.plugin.updateWordCount(); // Update display immediately
 					})
 			);
 
@@ -202,6 +219,19 @@ export class StatBarSettingTab extends PluginSettingTab {
 						this.plugin.settings.lastSavedTimeLabel = value;
 						await this.plugin.saveSettings();
 						this.plugin.updateLastSavedTime(); // Update display immediately
+					})
+			);
+
+		new Setting(containerEl)
+			.setName("Selection Prefix")
+			.setDesc("Customize the prefix shown when text is selected.")
+			.addText((text) =>
+				text
+					.setValue(this.plugin.settings.selectionPrefix)
+					.onChange(async (value) => {
+						this.plugin.settings.selectionPrefix = value;
+						await this.plugin.saveSettings();
+						this.plugin.updateWordCount(); // Update display immediately
 					})
 			);
 	}

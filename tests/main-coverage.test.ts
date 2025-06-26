@@ -34,7 +34,10 @@ describe('StatBarPlugin Coverage Tests', () => {
         getActiveViewOfType: jest.fn(() => ({
           editor: {
             getValue: jest.fn(() => 'Sample text for testing'),
-            getSelection: jest.fn(() => '')
+            getSelection: jest.fn(() => ''),
+            getCursor: jest.fn((type?: string) => {
+              return { line: 0, ch: 0 };
+            })
           },
           getViewData: jest.fn(() => 'Sample text for testing')
         }))
@@ -69,6 +72,9 @@ describe('StatBarPlugin Coverage Tests', () => {
 
     // Mock registerEvent method
     plugin.registerEvent = jest.fn();
+
+    // Mock registerDomEvent method
+    plugin.registerDomEvent = jest.fn();
 
     plugin.statusBarItemEl = mockStatusBarItem;
     plugin.lastSavedTimeEl = mockLastSavedTimeEl;
@@ -144,7 +150,10 @@ describe('StatBarPlugin Coverage Tests', () => {
     test('should handle empty display when all options are disabled', () => {
       const mockEditor = {
         getSelection: jest.fn(() => ''),
-        getValue: jest.fn(() => 'test content')
+        getValue: jest.fn(() => 'test content'),
+        getCursor: jest.fn((type?: string) => {
+          return { line: 0, ch: 0 };
+        })
       };
 
       mockApp.workspace.getActiveViewOfType.mockReturnValue({

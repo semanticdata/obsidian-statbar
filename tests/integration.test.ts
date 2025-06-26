@@ -28,7 +28,10 @@ describe('StatBarPlugin Integration Tests', () => {
         getActiveViewOfType: jest.fn(() => ({
           editor: {
             getValue: jest.fn(() => 'Sample text for testing'),
-            getSelection: jest.fn(() => '')
+            getSelection: jest.fn(() => ''),
+            getCursor: jest.fn((type?: string) => {
+              return { line: 0, ch: 0 };
+            })
           },
           getViewData: jest.fn(() => 'Sample text for testing')
         }))
@@ -70,6 +73,13 @@ describe('StatBarPlugin Integration Tests', () => {
     if (plugin.saveData) {
       plugin.saveData = jest.fn().mockResolvedValue(undefined);
     }
+    if (plugin.registerEvent) {
+      plugin.registerEvent = jest.fn();
+    }
+    if (plugin.registerDomEvent) {
+      plugin.registerDomEvent = jest.fn();
+    }
+
     // Don't mock updateWordCount and updateLastSavedTime - let them run normally
   });
 
@@ -327,7 +337,10 @@ describe('StatBarPlugin Integration Tests', () => {
       mockApp.workspace.getActiveViewOfType.mockReturnValue({
         editor: {
           getValue: jest.fn(() => 'Different content for testing'),
-          getSelection: jest.fn(() => '')
+          getSelection: jest.fn(() => ''),
+          getCursor: jest.fn((type?: string) => {
+            return { line: 0, ch: 0 };
+          })
         },
         getViewData: jest.fn(() => 'Different content for testing')
       });
