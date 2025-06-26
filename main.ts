@@ -2,10 +2,22 @@ import { App, MarkdownView, Plugin, PluginManifest } from "obsidian";
 import { StatBarSettingTab, MyPluginSettings, DEFAULT_SETTINGS } from "./src/settings";
 import { debugLog } from "./src/debug";
 
+interface DocumentStats {
+	wordCount: number;
+	charCount: number;
+	readTime: string;
+	isSelection?: boolean;
+}
+
 export default class StatBarPlugin extends Plugin {
 	settings!: MyPluginSettings; // Use definite assignment assertion
 	statusBarItemEl!: HTMLElement; // Use definite assignment assertion
 	lastSavedTimeEl!: HTMLElement; // New property for last saved time display
+
+	// Performance optimization properties
+	private debounceTimer: NodeJS.Timeout | null = null;
+	private lastContentHash = "";
+	private cachedStats: DocumentStats | null = null;
 
 	constructor(app: App, manifest: PluginManifest) {
 		super(app, manifest);
@@ -36,10 +48,10 @@ export default class StatBarPlugin extends Plugin {
 			})
 		);
 
-		// Register event handler for editor changes
+		// Register consolidated event handler for editor changes with debouncing
 		this.registerEvent(
 			this.app.workspace.on("editor-change", () => {
-				this.updateWordCount();
+				this.debouncedUpdate();
 			})
 		);
 
@@ -47,10 +59,10 @@ export default class StatBarPlugin extends Plugin {
 		this.lastSavedTimeEl = this.addStatusBarItem();
 		this.updateLastSavedTime(); // Initial update
 
-		// Register event handler for editor changes
+		// Register event handler for file save events (proper save event listening)
 		this.registerEvent(
-			this.app.workspace.on("editor-change", () => {
-				this.updateLastSavedTime(); // Update last saved time on editor change
+			this.app.vault.on("modify", () => {
+				this.updateLastSavedTime();
 			})
 		);
 
@@ -65,12 +77,34 @@ export default class StatBarPlugin extends Plugin {
 			const editor = activeView.editor;
 			const selectedText = editor.getSelection();
 			const text = selectedText || activeView.getViewData(); // Use selected text if available
-			const wordCount = this.getWordCount(text);
+			const isSelection = selectedText.length > 0;
+
+			// Check cache first
+			const contentHash = this.getContentHash(text);
+			const cachedStats = this.getCachedStats(contentHash);
+
+			let wordCount: number;
+			let readTime: string;
+
+			if (cachedStats) {
+				wordCount = cachedStats.wordCount;
+				readTime = cachedStats.readTime;
+			} else {
+				wordCount = this.getWordCount(text);
+				readTime = this.calculateReadTime(wordCount);
+
+				// Cache the results
+				const stats: DocumentStats = {
+					wordCount,
+					charCount: text.length,
+					readTime,
+					isSelection
+				};
+				this.setCachedStats(contentHash, stats);
+			}
+
 			const charCount = text.length;
 			const charNoSpaces = text.replace(/\s/g, "").length;
-
-			// Calculate read time (200 words per minute)
-			const readTime = this.calculateReadTime(wordCount);
 
 			let statusText = "";
 			if (this.settings.showWordCount) {
@@ -111,38 +145,16 @@ export default class StatBarPlugin extends Plugin {
 	private getWordCount(text: string): number {
 		debugLog("Raw input text:", text);
 
-		// Step 1: Remove wiki links
-		let cleanText = text.replace(/\[\[([^\]]+)\]\]/g, "$1");
-		debugLog("After removing wiki links:", cleanText);
+		// Optimized regex - combine multiple operations
+		const cleanText = text
+			.replace(/\[\[([^\]]+)\]\]/g, "$1") // wiki links
+			.replace(/\[([^\]]+)]\([^)]+\)/g, "$1") // markdown links
+			.replace(/```[\s\S]*?```/g, "") // code blocks
+			.replace(/`[^`]+`/g, "") // inline code
+			.replace(/[#*`_~>]/g, "") // markdown syntax
+			.replace(/\s+/g, " ").trim(); // normalize whitespace and trim
 
-		// Step 2: Remove Markdown links
-		// cleanText = cleanText.replace(/\[([^\]]+)\]\([^\)]+\)/g, "$1"); // Remove Markdown links // Failed ESLint
-		cleanText = cleanText.replace(/\[([^\]]+)]\([^)]+\)/g, "$1"); // Remove Markdown links
-		debugLog("After removing Markdown links:", cleanText);
-
-		// Step 3: Remove code blocks first
-		cleanText = cleanText.replace(/```[\s\S]*?```/g, ""); // Remove code blocks
-		debugLog("After removing code blocks:", cleanText);
-
-		// Step 4: Remove inline code
-		cleanText = cleanText.replace(/`[^`]+`/g, ""); // Remove inline code
-		debugLog("After removing inline code:", cleanText);
-
-		// Step 5: Remove empty lines
-		cleanText = cleanText.replace(/^\s*[\r\n]/gm, "");
-		debugLog("After removing empty lines:", cleanText);
-
-		// Step 6: Remove remaining Markdown syntax
-		cleanText = cleanText.replace(/[#*`_~>]/g, "");
-		debugLog("After removing remaining Markdown syntax:", cleanText);
-
-		// Step 7: Normalize whitespace
-		cleanText = cleanText.replace(/\s+/g, " ");
-		debugLog("After normalizing whitespace:", cleanText);
-
-		// Step 8: Trim leading and trailing whitespace
-		cleanText = cleanText.trim();
-		debugLog("After trimming whitespace:", cleanText);
+		debugLog("After cleaning:", cleanText);
 
 		// Final word count calculation
 		const words = cleanText.split(/\s+/).filter((word) => word.length > 0);
@@ -182,5 +194,27 @@ export default class StatBarPlugin extends Plugin {
 
 	async saveSettings() {
 		await this.saveData(this.settings);
+	}
+
+	// Performance optimization methods
+	private debouncedUpdate() {
+		if (this.debounceTimer) clearTimeout(this.debounceTimer);
+		this.debounceTimer = setTimeout(() => this.updateWordCount(), 300);
+	}
+
+	private getContentHash(text: string): string {
+		return text.length + text.slice(0, 100) + text.slice(-100);
+	}
+
+	private getCachedStats(hash: string): DocumentStats | null {
+		if (this.lastContentHash === hash && this.cachedStats) {
+			return this.cachedStats;
+		}
+		return null;
+	}
+
+	private setCachedStats(hash: string, stats: DocumentStats): void {
+		this.lastContentHash = hash;
+		this.cachedStats = stats;
 	}
 }
