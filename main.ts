@@ -129,13 +129,17 @@ export default class StatBarPlugin extends Plugin {
 
 			this.statusBarItemEl.setText(statusText.trim());
 
-			// Add tooltip with additional details
-			this.statusBarItemEl.setAttribute(
-				"aria-label",
-				`Words: ${wordCount.toLocaleString()} \n` +
-				`Characters: ${charCount.toLocaleString()} (${charNoSpaces.toLocaleString()} no spaces) \n` +
-				`Estimated Read Time: ${readTime} minutes`
-			);
+			// Add tooltip with additional details only if something is being displayed
+			if (statusText.trim()) {
+				this.statusBarItemEl.setAttribute(
+					"aria-label",
+					`Words: ${wordCount.toLocaleString()}·\n` +
+					`Characters: ${charCount.toLocaleString()} (${charNoSpaces.toLocaleString()} no spaces)·\n` +
+					`Estimated Read Time: ${readTime} minutes`
+				);
+			} else {
+				this.statusBarItemEl.setAttribute("aria-label", "");
+			}
 		} else {
 			this.statusBarItemEl.setText("");
 			this.statusBarItemEl.setAttribute("aria-label", "");
@@ -145,18 +149,34 @@ export default class StatBarPlugin extends Plugin {
 	private getWordCount(text: string): number {
 		debugLog("Raw input text:", text);
 
-		// Optimized regex - combine multiple operations
-		const cleanText = text
-			.replace(/\[\[([^\]]+)\]\]/g, "$1") // wiki links
-			.replace(/\[([^\]]+)]\([^)]+\)/g, "$1") // markdown links
-			.replace(/```[\s\S]*?```/g, "") // code blocks
-			.replace(/`[^`]+`/g, "") // inline code
-			.replace(/[#*`_~>]/g, "") // markdown syntax
-			.replace(/\s+/g, " ").trim(); // normalize whitespace and trim
+		// Step-by-step cleaning for better accuracy
+		let cleanText = text;
+
+		// Remove code blocks first (multiline)
+		cleanText = cleanText.replace(/```[\s\S]*?```/g, "");
+
+		// Remove inline code
+		cleanText = cleanText.replace(/`[^`]*`/g, "");
+
+		// Process wiki links - extract content
+		cleanText = cleanText.replace(/\[\[([^\]]+)\]\]/g, "$1");
+
+		// Process markdown links - extract link text
+		cleanText = cleanText.replace(/\[([^\]]+)\]\([^)]+\)/g, "$1");
+
+		// Remove markdown syntax characters
+		cleanText = cleanText.replace(/[#*_~>]/g, "");
+
+		// Remove punctuation that might be attached to words
+		cleanText = cleanText.replace(/[.,!?;:]/g, " ");
+
+		// Normalize whitespace
+		cleanText = cleanText.replace(/\s+/g, " ").trim();
 
 		debugLog("After cleaning:", cleanText);
 
 		// Final word count calculation
+		if (!cleanText) return 0;
 		const words = cleanText.split(/\s+/).filter((word) => word.length > 0);
 		debugLog("Words array:", words);
 		debugLog("Word count:", words.length);
