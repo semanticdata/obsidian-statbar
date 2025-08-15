@@ -1,4 +1,5 @@
 import { App, PluginSettingTab, Setting } from "obsidian";
+import { PLUGIN_NAME } from "./constants";
 
 export interface MyPluginSettings {
 	showWordCount: boolean;
@@ -47,7 +48,10 @@ export class StatBarSettingTab extends PluginSettingTab {
 
 		containerEl.empty();
 
+		containerEl.createEl("h1", { text: PLUGIN_NAME });
+
 		// Section for Toggles
+		containerEl.createEl("h2", { text: "Toggle Components" });
 		new Setting(containerEl)
 			.setName("Show Word Count")
 			.setDesc("Toggle to display the word count in the status bar.")
