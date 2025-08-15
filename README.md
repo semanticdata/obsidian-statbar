@@ -4,9 +4,9 @@ StatBar adds a word and character counter to the status bar in Obsidian. It upda
 
 | Description |                         Screenshots |
 | ----------- | ----------------------------------: |
-| Default     | ![screenshot-1](./screenshot-1.png) |
-| Last Saved  | ![screenshot-3](./screenshot-3.png) |
-| Custom      | ![screenshot-2](./screenshot-2.png) |
+| Default     | ![screenshot-1](./screenshots/screenshot-1.png) |
+| Last Saved  | ![screenshot-3](./screenshots/screenshot-3.png) |
+| Custom      | ![screenshot-2](./screenshots/screenshot-2.png) |
 
 ## ✨ Features
 
