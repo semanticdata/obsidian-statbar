@@ -32,7 +32,7 @@ StatBar adds a word and character counter to the status bar in Obsidian. It upda
 
 ### Manual Installation
 
-1. Download the latest release files (`main.js`, `manifest.json`, `styles.css`) from the [releases page](https://github.com/your-repo/obsidian-statbar/releases).
+1. Download the latest release files (`main.js`, `manifest.json`, `styles.css`) from the [releases page](https://github.com/semanticdata/obsidian-statbar/releases).
 2. Create a new folder named `statbar` inside your vault's `.obsidian/plugins/` directory.
 3. Copy the downloaded files into this new folder.
 4. Reload Obsidian (Ctrl/Cmd + R) and enable the plugin in the settings.
