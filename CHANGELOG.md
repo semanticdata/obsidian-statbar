@@ -19,6 +19,10 @@
 - Add stats based on current text selection
 - Add testing with Jest
     - Expand testing suite
+- Add formatting with Prettier
+    - Add prettier check to CI
+    - Add `.prettierignore` file
+    - Add new dependency `eslint-config-prettier`
 
 ## 1.0.0 - 2025-01-30
 
