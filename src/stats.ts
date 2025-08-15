@@ -38,7 +38,10 @@ export function getWordCount(text: string): number {
 	return words.length;
 }
 
-export function calculateReadTime(wordCount: number, wordsPerMinute: number): string {
+export function calculateReadTime(
+	wordCount: number,
+	wordsPerMinute: number,
+): string {
 	const totalSeconds = Math.round((wordCount / wordsPerMinute) * 60);
 	const minutes = Math.floor(totalSeconds / 60);
 	const seconds = totalSeconds % 60;

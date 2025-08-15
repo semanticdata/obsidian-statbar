@@ -4,7 +4,9 @@
 .statbar-stats {
 	padding: 4px 8px;
 	border-radius: 4px;
-	transition: background-color 0.3s ease, color 0.3s ease;
+	transition:
+		background-color 0.3s ease,
+		color 0.3s ease;
 	cursor: pointer;
 	font-variant-numeric: tabular-nums;
 }
@@ -13,7 +15,9 @@
 .statbar-time {
 	padding: 4px 8px;
 	border-radius: 4px;
-	transition: background-color 0.3s ease, color 0.3s ease;
+	transition:
+		background-color 0.3s ease,
+		color 0.3s ease;
 	cursor: pointer;
 	font-style: italic;
 	opacity: 0.8;

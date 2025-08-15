@@ -18,7 +18,7 @@
 - Add styles
 - Add stats based on current text selection
 - Add testing with Jest
-  - Expand testing suite
+    - Expand testing suite
 
 ## 1.0.0 - 2025-01-30
 
@@ -26,9 +26,9 @@
 
 - Initial release.
 - Core Status Bar Modules:
-  - Word counter
-  - Character counter
-  - Read time estimation
-  - Last saved time
+    - Word counter
+    - Character counter
+    - Read time estimation
+    - Last saved time
 - Toggle modules on/off in settings.
 - Adjust module labels in settings.

@@ -1,5 +1,9 @@
 import { App, MarkdownView, Plugin, PluginManifest } from "obsidian";
-import { StatBarSettingTab, MyPluginSettings, DEFAULT_SETTINGS } from "./src/settings";
+import {
+	StatBarSettingTab,
+	MyPluginSettings,
+	DEFAULT_SETTINGS,
+} from "./src/settings";
 import { DocumentStats } from "./src/types";
 import { getWordCount, calculateReadTime } from "./src/stats";
 import { DetailedStatsModal } from "./src/modal";
@@ -27,13 +31,13 @@ export default class StatBarPlugin extends Plugin {
 
 		// Create status bar item
 		this.statusBarItemEl = this.addStatusBarItem();
-		this.statusBarItemEl.addClass('statbar-stats');
+		this.statusBarItemEl.addClass("statbar-stats");
 
 		// Make status bar clickable
-		this.statusBarItemEl.addEventListener('click', () => {
+		this.statusBarItemEl.addEventListener("click", () => {
 			this.showDetailedStatsModal();
 		});
-		this.statusBarItemEl.style.cursor = 'pointer';
+		this.statusBarItemEl.style.cursor = "pointer";
 
 		// Initial update
 		this.updateWordCount();
@@ -42,35 +46,37 @@ export default class StatBarPlugin extends Plugin {
 		this.registerEvent(
 			this.app.workspace.on("file-open", () => {
 				this.updateWordCount();
-			})
+			}),
 		);
 
 		// Register event handler for active leaf changes
 		this.registerEvent(
 			this.app.workspace.on("active-leaf-change", (leaf) => {
 				this.updateWordCount(); // Update word count on active leaf change
-			})
+			}),
 		);
 
 		// Register consolidated event handler for editor changes with debouncing
 		this.registerEvent(
 			this.app.workspace.on("editor-change", () => {
 				this.debouncedUpdate();
-			})
+			}),
 		);
 
 		// Register event listeners for selection changes
-		this.registerDomEvent(document, 'selectionchange', () => {
+		this.registerDomEvent(document, "selectionchange", () => {
 			// Only update if we're in a markdown view
-			const activeView = this.app.workspace.getActiveViewOfType(MarkdownView);
+			const activeView =
+				this.app.workspace.getActiveViewOfType(MarkdownView);
 			if (activeView) {
 				this.updateWordCount();
 			}
 		});
 
 		// Also listen for mouse events that might change selection
-		this.registerDomEvent(document, 'mouseup', () => {
-			const activeView = this.app.workspace.getActiveViewOfType(MarkdownView);
+		this.registerDomEvent(document, "mouseup", () => {
+			const activeView =
+				this.app.workspace.getActiveViewOfType(MarkdownView);
 			if (activeView) {
 				// Small delay to ensure selection has been updated
 				setTimeout(() => this.updateWordCount(), 10);
@@ -79,14 +85,14 @@ export default class StatBarPlugin extends Plugin {
 
 		// Create last saved time display
 		this.lastSavedTimeEl = this.addStatusBarItem();
-		this.lastSavedTimeEl.addClass('statbar-time');
+		this.lastSavedTimeEl.addClass("statbar-time");
 		this.updateLastSavedTime(); // Initial update
 
 		// Register event handler for file save events (proper save event listening)
 		this.registerEvent(
 			this.app.vault.on("modify", () => {
 				this.updateLastSavedTime();
-			})
+			}),
 		);
 
 		// Add settings tab
@@ -100,19 +106,21 @@ export default class StatBarPlugin extends Plugin {
 			const editor = activeView.editor;
 
 			// Check if there's an actual selection by comparing cursor positions
-			const fromCursor = editor.getCursor('from');
-			const toCursor = editor.getCursor('to');
-			const hasSelection = fromCursor.line !== toCursor.line || fromCursor.ch !== toCursor.ch;
+			const fromCursor = editor.getCursor("from");
+			const toCursor = editor.getCursor("to");
+			const hasSelection =
+				fromCursor.line !== toCursor.line ||
+				fromCursor.ch !== toCursor.ch;
 
-			const selectedText = hasSelection ? editor.getSelection() : '';
+			const selectedText = hasSelection ? editor.getSelection() : "";
 			const text = selectedText || activeView.getViewData(); // Use selected text if available
 			const isSelection = hasSelection && selectedText.length > 0;
 
 			// Check cache first (separate caching for selection vs document)
 			const contentHash = this.getContentHash(text);
-			const cachedStats = isSelection ?
-				this.getCachedSelectionStats(contentHash) :
-				this.getCachedStats(contentHash);
+			const cachedStats = isSelection
+				? this.getCachedSelectionStats(contentHash)
+				: this.getCachedStats(contentHash);
 
 			let wordCount: number;
 			let readTime: string;
@@ -122,14 +130,17 @@ export default class StatBarPlugin extends Plugin {
 				readTime = cachedStats.readTime;
 			} else {
 				wordCount = getWordCount(text);
-				readTime = calculateReadTime(wordCount, this.settings.wordsPerMinute);
+				readTime = calculateReadTime(
+					wordCount,
+					this.settings.wordsPerMinute,
+				);
 
 				// Cache the results (separate caching for selection vs document)
 				const stats: DocumentStats = {
 					wordCount,
 					charCount: text.length,
 					readTime,
-					isSelection
+					isSelection,
 				};
 
 				if (isSelection) {
@@ -143,19 +154,23 @@ export default class StatBarPlugin extends Plugin {
 			const charNoSpaces = text.replace(/\s/g, "").length;
 
 			// Add selection prefix if text is selected and setting is enabled
-			const selectionPrefix = (isSelection && this.settings.showSelectionStats) ?
-				`${this.settings.selectionPrefix} ` : "";
+			const selectionPrefix =
+				isSelection && this.settings.showSelectionStats
+					? `${this.settings.selectionPrefix} `
+					: "";
 
 			let statusText = "";
 			if (this.settings.showWordCount) {
-				statusText += `${selectionPrefix}${this.settings.wordLabel
-					} ${wordCount.toLocaleString()}`;
+				statusText += `${selectionPrefix}${
+					this.settings.wordLabel
+				} ${wordCount.toLocaleString()}`;
 			}
 			if (this.settings.showCharCount) {
 				if (statusText)
 					statusText += ` ${this.settings.separatorLabel} `;
-				statusText += `${this.settings.charLabel
-					} ${charCount.toLocaleString()}`;
+				statusText += `${
+					this.settings.charLabel
+				} ${charCount.toLocaleString()}`;
 			}
 			if (this.settings.showReadTime) {
 				if (statusText)
@@ -171,18 +186,22 @@ export default class StatBarPlugin extends Plugin {
 
 			// Add tooltip with additional details only if something is being displayed
 			if (statusText.trim()) {
-				const tooltipPrefix = (isSelection && this.settings.showSelectionStats) ?
-					"Selection Stats:\n" : "Document Stats:\n";
-				const scopeInfo = (isSelection && this.settings.showSelectionStats) ?
-					`Selected text (${selectedText.length} chars)\n` : "Full document\n";
+				const tooltipPrefix =
+					isSelection && this.settings.showSelectionStats
+						? "Selection Stats:\n"
+						: "Document Stats:\n";
+				const scopeInfo =
+					isSelection && this.settings.showSelectionStats
+						? `Selected text (${selectedText.length} chars)\n`
+						: "Full document\n";
 
 				this.statusBarItemEl.setAttribute(
 					"aria-label",
 					tooltipPrefix +
-					scopeInfo +
-					`Words: ${wordCount.toLocaleString()}\n` +
-					`Characters: ${charCount.toLocaleString()} (${charNoSpaces.toLocaleString()} no spaces)\n` +
-					`Estimated Read Time: ${readTime} minutes`
+						scopeInfo +
+						`Words: ${wordCount.toLocaleString()}\n` +
+						`Characters: ${charCount.toLocaleString()} (${charNoSpaces.toLocaleString()} no spaces)\n` +
+						`Estimated Read Time: ${readTime} minutes`,
 				);
 			} else {
 				this.statusBarItemEl.setAttribute("aria-label", "");
@@ -207,7 +226,7 @@ export default class StatBarPlugin extends Plugin {
 		this.settings = Object.assign(
 			{},
 			DEFAULT_SETTINGS,
-			await this.loadData()
+			await this.loadData(),
 		);
 	}
 

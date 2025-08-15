@@ -1,265 +1,290 @@
-jest.mock('obsidian');
-
-import { PluginManifest } from 'obsidian';
-import StatBarPlugin from '../main';
-import { DEFAULT_SETTINGS } from '../src/settings';
-
-describe('StatBarPlugin Event Handler Tests', () => {
-  let plugin: StatBarPlugin;
-  let mockApp: any;
-  let mockManifest: PluginManifest;
-  let mockStatusBarItem: any;
-  let mockLastSavedTimeEl: any;
-
-  beforeEach(() => {
-    jest.clearAllMocks();
-
-    mockStatusBarItem = document.createElement('div');
-    (mockStatusBarItem as any).setText = jest.fn();
-    (mockStatusBarItem as any).setTitle = jest.fn();
-    (mockStatusBarItem as any).addClass = jest.fn();
-    (mockStatusBarItem as any).removeClass = jest.fn();
-    (mockStatusBarItem as any).setAttribute = jest.fn();
-    (mockStatusBarItem as any).remove = jest.fn();
-
-    mockLastSavedTimeEl = document.createElement('div');
-    (mockLastSavedTimeEl as any).setText = jest.fn();
-    (mockLastSavedTimeEl as any).addClass = jest.fn();
-    (mockLastSavedTimeEl as any).removeClass = jest.fn();
-    (mockLastSavedTimeEl as any).remove = jest.fn();
-
-    mockApp = {
-      workspace: {
-        on: jest.fn(() => ({ unload: jest.fn() })),
-        off: jest.fn(),
-        getActiveFile: jest.fn(),
-        getActiveViewOfType: jest.fn(() => ({
-          editor: {
-            getValue: jest.fn(() => 'Sample text for testing'),
-            getSelection: jest.fn(() => ''),
-            getCursor: jest.fn((type?: string) => {
-              // Mock cursor positions - same position means no selection
-              return { line: 0, ch: 0 };
-            })
-          },
-          getViewData: jest.fn(() => 'Sample text for testing')
-        }))
-      },
-      vault: {
-        on: jest.fn(() => ({ unload: jest.fn() })),
-        off: jest.fn()
-      }
-    };
-
-    mockManifest = {
-      id: 'test-statbar',
-      name: 'Test StatBar',
-      version: '1.0.0',
-      minAppVersion: '0.15.0',
-      description: 'Test plugin',
-      author: 'Test Author'
-    };
-
-    plugin = new StatBarPlugin(mockApp, mockManifest);
-    plugin.settings = { ...DEFAULT_SETTINGS };
-    // Ensure the plugin has access to the app
-    (plugin as any).app = mockApp;
-
-    // Mock the addStatusBarItem method
-    plugin.addStatusBarItem = jest.fn()
-      .mockReturnValueOnce(mockStatusBarItem)
-      .mockReturnValueOnce(mockLastSavedTimeEl);
+jest.mock("obsidian");
+
+import { PluginManifest } from "obsidian";
+import StatBarPlugin from "../main";
+import { DEFAULT_SETTINGS } from "../src/settings";
+
+describe("StatBarPlugin Event Handler Tests", () => {
+	let plugin: StatBarPlugin;
+	let mockApp: any;
+	let mockManifest: PluginManifest;
+	let mockStatusBarItem: any;
+	let mockLastSavedTimeEl: any;
+
+	beforeEach(() => {
+		jest.clearAllMocks();
+
+		mockStatusBarItem = document.createElement("div");
+		(mockStatusBarItem as any).setText = jest.fn();
+		(mockStatusBarItem as any).setTitle = jest.fn();
+		(mockStatusBarItem as any).addClass = jest.fn();
+		(mockStatusBarItem as any).removeClass = jest.fn();
+		(mockStatusBarItem as any).setAttribute = jest.fn();
+		(mockStatusBarItem as any).remove = jest.fn();
+
+		mockLastSavedTimeEl = document.createElement("div");
+		(mockLastSavedTimeEl as any).setText = jest.fn();
+		(mockLastSavedTimeEl as any).addClass = jest.fn();
+		(mockLastSavedTimeEl as any).removeClass = jest.fn();
+		(mockLastSavedTimeEl as any).remove = jest.fn();
+
+		mockApp = {
+			workspace: {
+				on: jest.fn(() => ({ unload: jest.fn() })),
+				off: jest.fn(),
+				getActiveFile: jest.fn(),
+				getActiveViewOfType: jest.fn(() => ({
+					editor: {
+						getValue: jest.fn(() => "Sample text for testing"),
+						getSelection: jest.fn(() => ""),
+						getCursor: jest.fn((type?: string) => {
+							// Mock cursor positions - same position means no selection
+							return { line: 0, ch: 0 };
+						}),
+					},
+					getViewData: jest.fn(() => "Sample text for testing"),
+				})),
+			},
+			vault: {
+				on: jest.fn(() => ({ unload: jest.fn() })),
+				off: jest.fn(),
+			},
+		};
+
+		mockManifest = {
+			id: "test-statbar",
+			name: "Test StatBar",
+			version: "1.0.0",
+			minAppVersion: "0.15.0",
+			description: "Test plugin",
+			author: "Test Author",
+		};
+
+		plugin = new StatBarPlugin(mockApp, mockManifest);
+		plugin.settings = { ...DEFAULT_SETTINGS };
+		// Ensure the plugin has access to the app
+		(plugin as any).app = mockApp;
+
+		// Mock the addStatusBarItem method
+		plugin.addStatusBarItem = jest
+			.fn()
+			.mockReturnValueOnce(mockStatusBarItem)
+			.mockReturnValueOnce(mockLastSavedTimeEl);
+
+		// Assign the mocked status bar elements to the plugin
+		(plugin as any).statusBarItemEl = mockStatusBarItem;
+		(plugin as any).lastSavedTimeEl = mockLastSavedTimeEl;
+
+		// Mock the addSettingTab method
+		plugin.addSettingTab = jest.fn();
+
+		// Mock registerEvent method
+		plugin.registerEvent = jest.fn();
+
+		// Mock registerDomEvent method
+		plugin.registerDomEvent = jest.fn();
+	});
+
+	test("should register file-open event handler during onload", async () => {
+		await plugin.onload();
+
+		expect(plugin.registerEvent).toHaveBeenCalledWith(expect.anything());
+
+		// Verify that workspace.on was called for file-open
+		expect(mockApp.workspace.on).toHaveBeenCalledWith(
+			"file-open",
+			expect.any(Function),
+		);
+	});
+
+	test("should register active-leaf-change event handler during onload", async () => {
+		await plugin.onload();
 
-    // Assign the mocked status bar elements to the plugin
-    (plugin as any).statusBarItemEl = mockStatusBarItem;
-    (plugin as any).lastSavedTimeEl = mockLastSavedTimeEl;
+		expect(mockApp.workspace.on).toHaveBeenCalledWith(
+			"active-leaf-change",
+			expect.any(Function),
+		);
+	});
 
-    // Mock the addSettingTab method
-    plugin.addSettingTab = jest.fn();
+	test("should register editor-change event handler during onload", async () => {
+		await plugin.onload();
 
-    // Mock registerEvent method
-    plugin.registerEvent = jest.fn();
+		expect(mockApp.workspace.on).toHaveBeenCalledWith(
+			"editor-change",
+			expect.any(Function),
+		);
+	});
 
-    // Mock registerDomEvent method
-    plugin.registerDomEvent = jest.fn();
-  });
+	test("should register vault modify event handler during onload", async () => {
+		await plugin.onload();
 
+		expect(mockApp.vault.on).toHaveBeenCalledWith(
+			"modify",
+			expect.any(Function),
+		);
+	});
 
+	test("should call updateWordCount when file-open event is triggered", async () => {
+		const updateWordCountSpy = jest
+			.spyOn(plugin, "updateWordCount")
+			.mockImplementation();
 
-  test('should register file-open event handler during onload', async () => {
-    await plugin.onload();
+		await plugin.onload();
 
-    expect(plugin.registerEvent).toHaveBeenCalledWith(
-      expect.anything()
-    );
+		// Get the file-open event handler
+		const fileOpenHandler = mockApp.workspace.on.mock.calls.find(
+			(call: any) => call[0] === "file-open",
+		)[1];
 
-    // Verify that workspace.on was called for file-open
-    expect(mockApp.workspace.on).toHaveBeenCalledWith('file-open', expect.any(Function));
-  });
+		// Trigger the event
+		fileOpenHandler();
 
-  test('should register active-leaf-change event handler during onload', async () => {
-    await plugin.onload();
+		expect(updateWordCountSpy).toHaveBeenCalled();
+	});
 
-    expect(mockApp.workspace.on).toHaveBeenCalledWith('active-leaf-change', expect.any(Function));
-  });
+	test("should call updateWordCount when active-leaf-change event is triggered", async () => {
+		const updateWordCountSpy = jest
+			.spyOn(plugin, "updateWordCount")
+			.mockImplementation();
 
-  test('should register editor-change event handler during onload', async () => {
-    await plugin.onload();
+		await plugin.onload();
 
-    expect(mockApp.workspace.on).toHaveBeenCalledWith('editor-change', expect.any(Function));
-  });
+		// Get the active-leaf-change event handler
+		const leafChangeHandler = mockApp.workspace.on.mock.calls.find(
+			(call: any) => call[0] === "active-leaf-change",
+		)[1];
 
-  test('should register vault modify event handler during onload', async () => {
-    await plugin.onload();
+		// Trigger the event with a mock leaf
+		leafChangeHandler({ view: {} });
 
-    expect(mockApp.vault.on).toHaveBeenCalledWith('modify', expect.any(Function));
-  });
+		expect(updateWordCountSpy).toHaveBeenCalled();
+	});
 
-  test('should call updateWordCount when file-open event is triggered', async () => {
-    const updateWordCountSpy = jest.spyOn(plugin, 'updateWordCount').mockImplementation();
+	test("should call debouncedUpdate when editor-change event is triggered", async () => {
+		const debouncedUpdateSpy = jest
+			.spyOn(plugin as any, "debouncedUpdate")
+			.mockImplementation();
 
-    await plugin.onload();
+		await plugin.onload();
 
-    // Get the file-open event handler
-    const fileOpenHandler = mockApp.workspace.on.mock.calls
-      .find((call: any) => call[0] === 'file-open')[1];
+		// Get the editor-change event handler
+		const editorChangeHandler = mockApp.workspace.on.mock.calls.find(
+			(call: any) => call[0] === "editor-change",
+		)[1];
 
-    // Trigger the event
-    fileOpenHandler();
+		// Trigger the event
+		editorChangeHandler();
 
-    expect(updateWordCountSpy).toHaveBeenCalled();
-  });
+		expect(debouncedUpdateSpy).toHaveBeenCalled();
+	});
 
-  test('should call updateWordCount when active-leaf-change event is triggered', async () => {
-    const updateWordCountSpy = jest.spyOn(plugin, 'updateWordCount').mockImplementation();
+	test("should call updateLastSavedTime when vault modify event is triggered", async () => {
+		const updateLastSavedTimeSpy = jest
+			.spyOn(plugin, "updateLastSavedTime")
+			.mockImplementation();
 
-    await plugin.onload();
+		await plugin.onload();
 
-    // Get the active-leaf-change event handler
-    const leafChangeHandler = mockApp.workspace.on.mock.calls
-      .find((call: any) => call[0] === 'active-leaf-change')[1];
+		// Get the vault modify event handler
+		const modifyHandler = mockApp.vault.on.mock.calls.find(
+			(call: any) => call[0] === "modify",
+		)[1];
 
-    // Trigger the event with a mock leaf
-    leafChangeHandler({ view: {} });
+		// Trigger the event
+		modifyHandler();
 
-    expect(updateWordCountSpy).toHaveBeenCalled();
-  });
+		expect(updateLastSavedTimeSpy).toHaveBeenCalled();
+	});
 
-  test('should call debouncedUpdate when editor-change event is triggered', async () => {
-    const debouncedUpdateSpy = jest.spyOn(plugin as any, 'debouncedUpdate').mockImplementation();
+	test("should set timeout when debouncedUpdate is called", async () => {
+		const setTimeoutSpy = jest.spyOn(global, "setTimeout");
 
-    await plugin.onload();
+		(plugin as any).debouncedUpdate();
 
-    // Get the editor-change event handler
-    const editorChangeHandler = mockApp.workspace.on.mock.calls
-      .find((call: any) => call[0] === 'editor-change')[1];
+		// Should set timeout with 300ms delay
+		expect(setTimeoutSpy).toHaveBeenCalledWith(expect.any(Function), 300);
+	});
 
-    // Trigger the event
-    editorChangeHandler();
+	test("should clear existing debounce timer when debouncedUpdate is called", async () => {
+		const clearTimeoutSpy = jest.spyOn(global, "clearTimeout");
 
-    expect(debouncedUpdateSpy).toHaveBeenCalled();
-  });
+		// Call debouncedUpdate to set a timer
+		(plugin as any).debouncedUpdate();
 
-  test('should call updateLastSavedTime when vault modify event is triggered', async () => {
-    const updateLastSavedTimeSpy = jest.spyOn(plugin, 'updateLastSavedTime').mockImplementation();
+		// Call it again to clear the previous timer
+		(plugin as any).debouncedUpdate();
 
-    await plugin.onload();
+		expect(clearTimeoutSpy).toHaveBeenCalled();
+	});
 
-    // Get the vault modify event handler
-    const modifyHandler = mockApp.vault.on.mock.calls
-      .find((call: any) => call[0] === 'modify')[1];
+	test("should handle case when no active view exists", () => {
+		mockApp.workspace.getActiveViewOfType.mockReturnValue(null);
 
-    // Trigger the event
-    modifyHandler();
+		plugin.updateWordCount();
 
-    expect(updateLastSavedTimeSpy).toHaveBeenCalled();
-  });
+		expect(mockStatusBarItem.setText).toHaveBeenCalledWith("");
+		expect(mockStatusBarItem.setAttribute).toHaveBeenCalledWith(
+			"aria-label",
+			"",
+		);
+	});
 
-  test('should set timeout when debouncedUpdate is called', async () => {
-    const setTimeoutSpy = jest.spyOn(global, 'setTimeout');
+	test("should update last saved time with current time when showLastSavedTime is true", () => {
+		plugin.settings.showLastSavedTime = true;
+		const mockDate = new Date("2023-01-01T12:00:00Z");
+		jest.spyOn(global, "Date").mockImplementation(() => mockDate as any);
 
-    (plugin as any).debouncedUpdate();
+		plugin.updateLastSavedTime();
 
-    // Should set timeout with 300ms delay
-    expect(setTimeoutSpy).toHaveBeenCalledWith(expect.any(Function), 300);
-  });
+		expect(mockLastSavedTimeEl.setText).toHaveBeenCalledWith(
+			expect.stringContaining("Last Saved:"),
+		);
+	});
 
-  test('should clear existing debounce timer when debouncedUpdate is called', async () => {
-    const clearTimeoutSpy = jest.spyOn(global, 'clearTimeout');
+	test("should clear last saved time display when showLastSavedTime is false", () => {
+		plugin.settings.showLastSavedTime = false;
 
-    // Call debouncedUpdate to set a timer
-    (plugin as any).debouncedUpdate();
+		plugin.updateLastSavedTime();
 
-    // Call it again to clear the previous timer
-    (plugin as any).debouncedUpdate();
+		expect(mockLastSavedTimeEl.setText).toHaveBeenCalledWith("");
+	});
 
-    expect(clearTimeoutSpy).toHaveBeenCalled();
-  });
+	test("should create content hash correctly", () => {
+		const text =
+			"This is a test text that is longer than 100 characters to test the hash function properly and ensure it works as expected";
+		const hash = (plugin as any).getContentHash(text);
 
-  test('should handle case when no active view exists', () => {
-    mockApp.workspace.getActiveViewOfType.mockReturnValue(null);
+		expect(hash).toBe(text.length + text.slice(0, 100) + text.slice(-100));
+	});
 
-    plugin.updateWordCount();
+	test("should return cached stats when hash matches", () => {
+		const hash = "test-hash";
+		const stats = { wordCount: 10, charCount: 50, readTime: "1:00" };
 
-    expect(mockStatusBarItem.setText).toHaveBeenCalledWith('');
-    expect(mockStatusBarItem.setAttribute).toHaveBeenCalledWith('aria-label', '');
-  });
+		(plugin as any).setCachedStats(hash, stats);
+		const cachedStats = (plugin as any).getCachedStats(hash);
 
-  test('should update last saved time with current time when showLastSavedTime is true', () => {
-    plugin.settings.showLastSavedTime = true;
-    const mockDate = new Date('2023-01-01T12:00:00Z');
-    jest.spyOn(global, 'Date').mockImplementation(() => mockDate as any);
+		expect(cachedStats).toEqual(stats);
+	});
 
-    plugin.updateLastSavedTime();
+	test("should return null when hash does not match cached stats", () => {
+		const hash1 = "test-hash-1";
+		const hash2 = "test-hash-2";
+		const stats = { wordCount: 10, charCount: 50, readTime: "1:00" };
 
-    expect(mockLastSavedTimeEl.setText).toHaveBeenCalledWith(
-      expect.stringContaining('Last Saved:')
-    );
-  });
+		(plugin as any).setCachedStats(hash1, stats);
+		const cachedStats = (plugin as any).getCachedStats(hash2);
 
-  test('should clear last saved time display when showLastSavedTime is false', () => {
-    plugin.settings.showLastSavedTime = false;
+		expect(cachedStats).toBeNull();
+	});
 
-    plugin.updateLastSavedTime();
+	test("should set cached stats correctly", () => {
+		const hash = "test-hash";
+		const stats = { wordCount: 10, charCount: 50, readTime: "1:00" };
 
-    expect(mockLastSavedTimeEl.setText).toHaveBeenCalledWith('');
-  });
+		(plugin as any).setCachedStats(hash, stats);
 
-  test('should create content hash correctly', () => {
-    const text = 'This is a test text that is longer than 100 characters to test the hash function properly and ensure it works as expected';
-    const hash = (plugin as any).getContentHash(text);
-
-    expect(hash).toBe(text.length + text.slice(0, 100) + text.slice(-100));
-  });
-
-  test('should return cached stats when hash matches', () => {
-    const hash = 'test-hash';
-    const stats = { wordCount: 10, charCount: 50, readTime: '1:00' };
-
-    (plugin as any).setCachedStats(hash, stats);
-    const cachedStats = (plugin as any).getCachedStats(hash);
-
-    expect(cachedStats).toEqual(stats);
-  });
-
-  test('should return null when hash does not match cached stats', () => {
-    const hash1 = 'test-hash-1';
-    const hash2 = 'test-hash-2';
-    const stats = { wordCount: 10, charCount: 50, readTime: '1:00' };
-
-    (plugin as any).setCachedStats(hash1, stats);
-    const cachedStats = (plugin as any).getCachedStats(hash2);
-
-    expect(cachedStats).toBeNull();
-  });
-
-  test('should set cached stats correctly', () => {
-    const hash = 'test-hash';
-    const stats = { wordCount: 10, charCount: 50, readTime: '1:00' };
-
-    (plugin as any).setCachedStats(hash, stats);
-
-    expect((plugin as any).lastContentHash).toBe(hash);
-    expect((plugin as any).cachedStats).toEqual(stats);
-  });
+		expect((plugin as any).lastContentHash).toBe(hash);
+		expect((plugin as any).cachedStats).toEqual(stats);
+	});
 });

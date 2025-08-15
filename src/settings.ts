@@ -62,7 +62,7 @@ export class StatBarSettingTab extends PluginSettingTab {
 						this.plugin.settings.showWordCount = value;
 						await this.plugin.saveSettings();
 						this.plugin.updateWordCount(); // Update display immediately
-					})
+					}),
 			);
 
 		new Setting(containerEl)
@@ -75,13 +75,13 @@ export class StatBarSettingTab extends PluginSettingTab {
 						this.plugin.settings.showCharCount = value;
 						await this.plugin.saveSettings();
 						this.plugin.updateWordCount(); // Update display immediately
-					})
+					}),
 			);
 
 		new Setting(containerEl)
 			.setName("Show Read Time")
 			.setDesc(
-				"Toggle to display the estimated read time in the status bar."
+				"Toggle to display the estimated read time in the status bar.",
 			)
 			.addToggle((toggle) =>
 				toggle
@@ -90,7 +90,7 @@ export class StatBarSettingTab extends PluginSettingTab {
 						this.plugin.settings.showReadTime = value;
 						await this.plugin.saveSettings();
 						this.plugin.updateWordCount(); // Update display immediately
-					})
+					}),
 			);
 
 		new Setting(containerEl)
@@ -103,7 +103,7 @@ export class StatBarSettingTab extends PluginSettingTab {
 						this.plugin.settings.showLastSavedTime = value;
 						await this.plugin.saveSettings();
 						this.plugin.updateLastSavedTime(); // Update display immediately
-					})
+					}),
 			);
 
 		new Setting(containerEl)
@@ -116,7 +116,7 @@ export class StatBarSettingTab extends PluginSettingTab {
 						this.plugin.settings.showSelectionStats = value;
 						await this.plugin.saveSettings();
 						this.plugin.updateWordCount(); // Update display immediately
-					})
+					}),
 			);
 
 		// Section for Custom Labels
@@ -132,7 +132,7 @@ export class StatBarSettingTab extends PluginSettingTab {
 						this.plugin.settings.wordLabel = value;
 						await this.plugin.saveSettings();
 						this.plugin.updateWordCount(); // Update display immediately
-					})
+					}),
 			);
 
 		new Setting(containerEl)
@@ -145,7 +145,7 @@ export class StatBarSettingTab extends PluginSettingTab {
 						this.plugin.settings.charLabel = value;
 						await this.plugin.saveSettings();
 						this.plugin.updateWordCount(); // Update display immediately
-					})
+					}),
 			);
 
 		new Setting(containerEl)
@@ -158,13 +158,13 @@ export class StatBarSettingTab extends PluginSettingTab {
 						this.plugin.settings.readTimeLabel = value;
 						await this.plugin.saveSettings();
 						this.plugin.updateWordCount(); // Update display immediately
-					})
+					}),
 			);
 
 		new Setting(containerEl)
 			.setName("Separator Label")
 			.setDesc(
-				"Customize the label used as a separator between components."
+				"Customize the label used as a separator between components.",
 			)
 			.addText((text) =>
 				text
@@ -173,13 +173,13 @@ export class StatBarSettingTab extends PluginSettingTab {
 						this.plugin.settings.separatorLabel = value;
 						await this.plugin.saveSettings();
 						this.plugin.updateWordCount(); // Update display immediately
-					})
+					}),
 			);
 
 		new Setting(containerEl)
 			.setName("Read Time Label Position")
 			.setDesc(
-				"Choose whether the read time label appears before or after the time."
+				"Choose whether the read time label appears before or after the time.",
 			)
 			.addDropdown((dropdown) =>
 				dropdown
@@ -192,7 +192,7 @@ export class StatBarSettingTab extends PluginSettingTab {
 							| "after";
 						await this.plugin.saveSettings();
 						this.plugin.updateWordCount(); // Update display immediately
-					})
+					}),
 			);
 
 		// New setting for custom words per minute
@@ -209,7 +209,7 @@ export class StatBarSettingTab extends PluginSettingTab {
 							await this.plugin.saveSettings();
 							this.plugin.updateWordCount(); // Update display immediately
 						}
-					})
+					}),
 			);
 
 		// New setting for last saved time label (optional)
@@ -223,7 +223,7 @@ export class StatBarSettingTab extends PluginSettingTab {
 						this.plugin.settings.lastSavedTimeLabel = value;
 						await this.plugin.saveSettings();
 						this.plugin.updateLastSavedTime(); // Update display immediately
-					})
+					}),
 			);
 
 		new Setting(containerEl)
@@ -236,7 +236,7 @@ export class StatBarSettingTab extends PluginSettingTab {
 						this.plugin.settings.selectionPrefix = value;
 						await this.plugin.saveSettings();
 						this.plugin.updateWordCount(); // Update display immediately
-					})
+					}),
 			);
 	}
 }
