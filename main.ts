@@ -1,14 +1,12 @@
-import { App, MarkdownView, Plugin, PluginManifest, Modal } from "obsidian";
-import { StatBarSettingTab, MyPluginSettings, DEFAULT_SETTINGS } from "./src/settings";
-import { debugLog } from "./src/debug";
-
-interface DocumentStats {
-	wordCount: number;
-	charCount: number;
-	readTime: string;
-	isSelection?: boolean;
-	selectionPrefix?: string;
-}
+import { App, MarkdownView, Plugin, PluginManifest } from "obsidian";
+import {
+	StatBarSettingTab,
+	MyPluginSettings,
+	DEFAULT_SETTINGS,
+} from "./src/settings";
+import { DocumentStats } from "./src/types";
+import { getWordCount, calculateReadTime } from "./src/stats";
+import { DetailedStatsModal } from "./src/modal";
 
 export default class StatBarPlugin extends Plugin {
 	settings!: MyPluginSettings; // Use definite assignment assertion
@@ -33,13 +31,13 @@ export default class StatBarPlugin extends Plugin {
 
 		// Create status bar item
 		this.statusBarItemEl = this.addStatusBarItem();
-		this.statusBarItemEl.addClass('statbar-stats');
+		this.statusBarItemEl.addClass("statbar-stats");
 
 		// Make status bar clickable
-		this.statusBarItemEl.addEventListener('click', () => {
+		this.statusBarItemEl.addEventListener("click", () => {
 			this.showDetailedStatsModal();
 		});
-		this.statusBarItemEl.style.cursor = 'pointer';
+		this.statusBarItemEl.style.cursor = "pointer";
 
 		// Initial update
 		this.updateWordCount();
@@ -48,35 +46,37 @@ export default class StatBarPlugin extends Plugin {
 		this.registerEvent(
 			this.app.workspace.on("file-open", () => {
 				this.updateWordCount();
-			})
+			}),
 		);
 
 		// Register event handler for active leaf changes
 		this.registerEvent(
 			this.app.workspace.on("active-leaf-change", (leaf) => {
 				this.updateWordCount(); // Update word count on active leaf change
-			})
+			}),
 		);
 
 		// Register consolidated event handler for editor changes with debouncing
 		this.registerEvent(
 			this.app.workspace.on("editor-change", () => {
 				this.debouncedUpdate();
-			})
+			}),
 		);
 
 		// Register event listeners for selection changes
-		this.registerDomEvent(document, 'selectionchange', () => {
+		this.registerDomEvent(document, "selectionchange", () => {
 			// Only update if we're in a markdown view
-			const activeView = this.app.workspace.getActiveViewOfType(MarkdownView);
+			const activeView =
+				this.app.workspace.getActiveViewOfType(MarkdownView);
 			if (activeView) {
 				this.updateWordCount();
 			}
 		});
 
 		// Also listen for mouse events that might change selection
-		this.registerDomEvent(document, 'mouseup', () => {
-			const activeView = this.app.workspace.getActiveViewOfType(MarkdownView);
+		this.registerDomEvent(document, "mouseup", () => {
+			const activeView =
+				this.app.workspace.getActiveViewOfType(MarkdownView);
 			if (activeView) {
 				// Small delay to ensure selection has been updated
 				setTimeout(() => this.updateWordCount(), 10);
@@ -85,14 +85,14 @@ export default class StatBarPlugin extends Plugin {
 
 		// Create last saved time display
 		this.lastSavedTimeEl = this.addStatusBarItem();
-		this.lastSavedTimeEl.addClass('statbar-time');
+		this.lastSavedTimeEl.addClass("statbar-time");
 		this.updateLastSavedTime(); // Initial update
 
 		// Register event handler for file save events (proper save event listening)
 		this.registerEvent(
 			this.app.vault.on("modify", () => {
 				this.updateLastSavedTime();
-			})
+			}),
 		);
 
 		// Add settings tab
@@ -106,19 +106,21 @@ export default class StatBarPlugin extends Plugin {
 			const editor = activeView.editor;
 
 			// Check if there's an actual selection by comparing cursor positions
-			const fromCursor = editor.getCursor('from');
-			const toCursor = editor.getCursor('to');
-			const hasSelection = fromCursor.line !== toCursor.line || fromCursor.ch !== toCursor.ch;
+			const fromCursor = editor.getCursor("from");
+			const toCursor = editor.getCursor("to");
+			const hasSelection =
+				fromCursor.line !== toCursor.line ||
+				fromCursor.ch !== toCursor.ch;
 
-			const selectedText = hasSelection ? editor.getSelection() : '';
+			const selectedText = hasSelection ? editor.getSelection() : "";
 			const text = selectedText || activeView.getViewData(); // Use selected text if available
 			const isSelection = hasSelection && selectedText.length > 0;
 
 			// Check cache first (separate caching for selection vs document)
 			const contentHash = this.getContentHash(text);
-			const cachedStats = isSelection ?
-				this.getCachedSelectionStats(contentHash) :
-				this.getCachedStats(contentHash);
+			const cachedStats = isSelection
+				? this.getCachedSelectionStats(contentHash)
+				: this.getCachedStats(contentHash);
 
 			let wordCount: number;
 			let readTime: string;
@@ -127,15 +129,18 @@ export default class StatBarPlugin extends Plugin {
 				wordCount = cachedStats.wordCount;
 				readTime = cachedStats.readTime;
 			} else {
-				wordCount = this.getWordCount(text);
-				readTime = this.calculateReadTime(wordCount);
+				wordCount = getWordCount(text);
+				readTime = calculateReadTime(
+					wordCount,
+					this.settings.wordsPerMinute,
+				);
 
 				// Cache the results (separate caching for selection vs document)
 				const stats: DocumentStats = {
 					wordCount,
 					charCount: text.length,
 					readTime,
-					isSelection
+					isSelection,
 				};
 
 				if (isSelection) {
@@ -149,19 +154,23 @@ export default class StatBarPlugin extends Plugin {
 			const charNoSpaces = text.replace(/\s/g, "").length;
 
 			// Add selection prefix if text is selected and setting is enabled
-			const selectionPrefix = (isSelection && this.settings.showSelectionStats) ?
-				`${this.settings.selectionPrefix} ` : "";
+			const selectionPrefix =
+				isSelection && this.settings.showSelectionStats
+					? `${this.settings.selectionPrefix} `
+					: "";
 
 			let statusText = "";
 			if (this.settings.showWordCount) {
-				statusText += `${selectionPrefix}${this.settings.wordLabel
-					} ${wordCount.toLocaleString()}`;
+				statusText += `${selectionPrefix}${
+					this.settings.wordLabel
+				} ${wordCount.toLocaleString()}`;
 			}
 			if (this.settings.showCharCount) {
 				if (statusText)
 					statusText += ` ${this.settings.separatorLabel} `;
-				statusText += `${this.settings.charLabel
-					} ${charCount.toLocaleString()}`;
+				statusText += `${
+					this.settings.charLabel
+				} ${charCount.toLocaleString()}`;
 			}
 			if (this.settings.showReadTime) {
 				if (statusText)
@@ -177,18 +186,22 @@ export default class StatBarPlugin extends Plugin {
 
 			// Add tooltip with additional details only if something is being displayed
 			if (statusText.trim()) {
-				const tooltipPrefix = (isSelection && this.settings.showSelectionStats) ?
-					"Selection Stats:\n" : "Document Stats:\n";
-				const scopeInfo = (isSelection && this.settings.showSelectionStats) ?
-					`Selected text (${selectedText.length} chars)\n` : "Full document\n";
+				const tooltipPrefix =
+					isSelection && this.settings.showSelectionStats
+						? "Selection Stats:\n"
+						: "Document Stats:\n";
+				const scopeInfo =
+					isSelection && this.settings.showSelectionStats
+						? `Selected text (${selectedText.length} chars)\n`
+						: "Full document\n";
 
 				this.statusBarItemEl.setAttribute(
 					"aria-label",
 					tooltipPrefix +
-					scopeInfo +
-					`Words: ${wordCount.toLocaleString()}\n` +
-					`Characters: ${charCount.toLocaleString()} (${charNoSpaces.toLocaleString()} no spaces)\n` +
-					`Estimated Read Time: ${readTime} minutes`
+						scopeInfo +
+						`Words: ${wordCount.toLocaleString()}\n` +
+						`Characters: ${charCount.toLocaleString()} (${charNoSpaces.toLocaleString()} no spaces)\n` +
+						`Estimated Read Time: ${readTime} minutes`,
 				);
 			} else {
 				this.statusBarItemEl.setAttribute("aria-label", "");
@@ -197,54 +210,6 @@ export default class StatBarPlugin extends Plugin {
 			this.statusBarItemEl.setText("");
 			this.statusBarItemEl.setAttribute("aria-label", "");
 		}
-	}
-
-	public getWordCount(text: string): number {
-		debugLog("Raw input text:", text);
-
-		// Step-by-step cleaning for better accuracy
-		let cleanText = text;
-
-		// Remove code blocks first (multiline)
-		cleanText = cleanText.replace(/```[\s\S]*?```/g, "");
-
-		// Remove inline code
-		cleanText = cleanText.replace(/`[^`]*`/g, "");
-
-		// Process wiki links - extract content
-		cleanText = cleanText.replace(/\[\[([^\]]+)\]\]/g, "$1");
-
-		// Process markdown links - extract link text
-		cleanText = cleanText.replace(/\[([^\]]+)\]\([^)]+\)/g, "$1");
-
-		// Remove markdown syntax characters
-		cleanText = cleanText.replace(/[#*_~>]/g, "");
-
-		// Remove punctuation that might be attached to words
-		cleanText = cleanText.replace(/[.,!?;:]/g, " ");
-
-		// Normalize whitespace
-		cleanText = cleanText.replace(/\s+/g, " ").trim();
-
-		debugLog("After cleaning:", cleanText);
-
-		// Final word count calculation
-		if (!cleanText) return 0;
-		const words = cleanText.split(/\s+/).filter((word) => word.length > 0);
-		debugLog("Words array:", words);
-		debugLog("Word count:", words.length);
-
-		return words.length;
-	}
-
-	public calculateReadTime(wordCount: number): string {
-		const totalSeconds = Math.round(
-			(wordCount / this.settings.wordsPerMinute) * 60
-		);
-		const minutes = Math.floor(totalSeconds / 60);
-		const seconds = totalSeconds % 60;
-
-		return `${minutes}:${seconds.toString().padStart(2, "0")}`; // Format as "MM:SS"
 	}
 
 	public updateLastSavedTime() {
@@ -261,7 +226,7 @@ export default class StatBarPlugin extends Plugin {
 		this.settings = Object.assign(
 			{},
 			DEFAULT_SETTINGS,
-			await this.loadData()
+			await this.loadData(),
 		);
 	}
 
@@ -305,113 +270,5 @@ export default class StatBarPlugin extends Plugin {
 
 	private showDetailedStatsModal(): void {
 		new DetailedStatsModal(this.app, this).open();
-	}
-}
-
-class DetailedStatsModal extends Modal {
-	plugin: StatBarPlugin;
-
-	constructor(app: App, plugin: StatBarPlugin) {
-		super(app);
-		this.plugin = plugin;
-	}
-
-	onOpen() {
-		const { contentEl } = this;
-		contentEl.empty();
-
-		// Get current stats
-		const activeView = this.app.workspace.getActiveViewOfType(MarkdownView);
-		if (!activeView) {
-			contentEl.createEl('p', { text: 'No active markdown file' });
-			return;
-		}
-
-		const editor = activeView.editor;
-		const fromCursor = editor.getCursor('from');
-		const toCursor = editor.getCursor('to');
-		const hasSelection = fromCursor.line !== toCursor.line || fromCursor.ch !== toCursor.ch;
-		const selectedText = hasSelection ? editor.getSelection() : '';
-		const fullText = activeView.getViewData();
-		const isSelection = hasSelection && selectedText.length > 0;
-
-		// Calculate stats for both selection and full document
-		const currentText = isSelection ? selectedText : fullText;
-		const wordCount = this.plugin.getWordCount(currentText);
-		const charCount = currentText.length;
-		const charNoSpaces = currentText.replace(/\s/g, '').length;
-		const readTime = this.plugin.calculateReadTime(wordCount);
-
-		// Current scope indicator (serves as main header)
-		if (isSelection) {
-			const scopeEl = contentEl.createEl('div', { cls: 'statbar-modal-scope' });
-			scopeEl.createEl('strong', { text: '📝 Selection Statistics' });
-			scopeEl.createEl('p', { text: `Analyzing selected text (${selectedText.length} characters)` });
-		} else {
-			const scopeEl = contentEl.createEl('div', { cls: 'statbar-modal-scope' });
-			scopeEl.createEl('strong', { text: '📄 Document Statistics' });
-			scopeEl.createEl('p', { text: 'Analyzing entire document' });
-		}
-
-		// Stats container
-		const statsContainer = contentEl.createEl('div', { cls: 'statbar-modal-stats' });
-
-		// Word count
-		const wordEl = statsContainer.createEl('div', { cls: 'statbar-stat-item' });
-		wordEl.createEl('span', { text: 'Words: ', cls: 'statbar-stat-label' });
-		wordEl.createEl('span', { text: wordCount.toLocaleString(), cls: 'statbar-stat-value' });
-
-		// Character count
-		const charEl = statsContainer.createEl('div', { cls: 'statbar-stat-item' });
-		charEl.createEl('span', { text: 'Characters: ', cls: 'statbar-stat-label' });
-		charEl.createEl('span', { text: charCount.toLocaleString(), cls: 'statbar-stat-value' });
-
-		// Character count (no spaces)
-		const charNoSpacesEl = statsContainer.createEl('div', { cls: 'statbar-stat-item' });
-		charNoSpacesEl.createEl('span', { text: 'Characters (no spaces): ', cls: 'statbar-stat-label' });
-		charNoSpacesEl.createEl('span', { text: charNoSpaces.toLocaleString(), cls: 'statbar-stat-value' });
-
-		// Read time
-		const readTimeEl = statsContainer.createEl('div', { cls: 'statbar-stat-item' });
-		readTimeEl.createEl('span', { text: 'Estimated read time: ', cls: 'statbar-stat-label' });
-		readTimeEl.createEl('span', { text: `${readTime} minutes`, cls: 'statbar-stat-value' });
-
-		// Reading speed info
-		const speedEl = statsContainer.createEl('div', { cls: 'statbar-stat-item statbar-stat-info' });
-		speedEl.createEl('span', { text: `Based on ${this.plugin.settings.wordsPerMinute} words per minute`, cls: 'statbar-stat-note' });
-
-		// If there's a selection, also show document stats
-		if (isSelection) {
-			const fullWordCount = this.plugin.getWordCount(fullText);
-			const fullCharCount = fullText.length;
-			const fullReadTime = this.plugin.calculateReadTime(fullWordCount);
-
-			contentEl.createEl('hr');
-			contentEl.createEl('h3', { text: '📄 Full Document Statistics' });
-
-			const fullStatsContainer = contentEl.createEl('div', { cls: 'statbar-modal-stats' });
-
-			const fullWordEl = fullStatsContainer.createEl('div', { cls: 'statbar-stat-item' });
-			fullWordEl.createEl('span', { text: 'Words: ', cls: 'statbar-stat-label' });
-			fullWordEl.createEl('span', { text: fullWordCount.toLocaleString(), cls: 'statbar-stat-value' });
-
-			const fullCharEl = fullStatsContainer.createEl('div', { cls: 'statbar-stat-item' });
-			fullCharEl.createEl('span', { text: 'Characters: ', cls: 'statbar-stat-label' });
-			fullCharEl.createEl('span', { text: fullCharCount.toLocaleString(), cls: 'statbar-stat-value' });
-
-			const fullReadTimeEl = fullStatsContainer.createEl('div', { cls: 'statbar-stat-item' });
-			fullReadTimeEl.createEl('span', { text: 'Estimated read time: ', cls: 'statbar-stat-label' });
-			fullReadTimeEl.createEl('span', { text: `${fullReadTime} minutes`, cls: 'statbar-stat-value' });
-		}
-
-		// Close button
-		const buttonContainer = contentEl.createEl('div', { cls: 'statbar-modal-buttons' });
-		const closeButton = buttonContainer.createEl('button', { text: 'Close', cls: 'mod-cta' });
-		closeButton.addEventListener('click', () => this.close());
-	}
-
-	onClose() {
-		const { contentEl } = this;
-		contentEl.empty();
 	}
 }

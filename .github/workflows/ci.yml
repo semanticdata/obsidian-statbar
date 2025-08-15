@@ -41,3 +41,6 @@ jobs:
 
             - name: Build project
               run: pnpm build
+
+            - name: Check poject formatting
+              run: pnpm check

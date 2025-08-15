@@ -2,8 +2,8 @@
 
 StatBar adds a word and character counter to the status bar in Obsidian. It updates automatically as you type and intelligently ignores Markdown syntax when counting words, providing a seamless writing experience.
 
-| Description |                         Screenshots |
-| ----------- | ----------------------------------: |
+| Description |                                     Screenshots |
+| ----------- | ----------------------------------------------: |
 | Default     | ![screenshot-1](./screenshots/screenshot-1.png) |
 | Last Saved  | ![screenshot-3](./screenshots/screenshot-3.png) |
 | Custom      | ![screenshot-2](./screenshots/screenshot-2.png) |
@@ -16,10 +16,10 @@ StatBar adds a word and character counter to the status bar in Obsidian. It upda
 - Ignores Markdown syntax when counting words, providing accurate results for your content
 - Customizable labels allowing you to personalize your status bar
 - Toggleable components, giving you control over what information is shown:
-  - Word count
-  - Character count
-  - Estimated read time
-  - Last saved time
+    - Word count
+    - Character count
+    - Estimated read time
+    - Last saved time
 
 ## 📦 Installation
 
