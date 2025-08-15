@@ -4,14 +4,16 @@ jest.mock('obsidian');
 import { PluginManifest } from 'obsidian';
 import StatBarPlugin from '../main';
 import { DEFAULT_SETTINGS } from '../src/settings';
+import * as stats from '../src/stats';
 
 describe('StatBarPlugin Integration Tests', () => {
   let plugin: StatBarPlugin;
   let mockApp: any;
   let mockManifest: PluginManifest;
   let mockStatusBarItem: any;
+  let getWordCountSpy: jest.SpyInstance;
 
-  beforeEach(() => {
+  beforeEach(async () => {
     jest.clearAllMocks();
     mockStatusBarItem = document.createElement('div');
     (mockStatusBarItem as any).setText = jest.fn();
@@ -81,6 +83,14 @@ describe('StatBarPlugin Integration Tests', () => {
       plugin.registerDomEvent = jest.fn();
     }
 
+    getWordCountSpy = jest.spyOn(stats, 'getWordCount').mockClear();
+
+    await plugin.onload();
+    plugin.statusBarItemEl = mockStatusBarItem;
+
+    // Clear the spy after onload since it calls updateWordCount() during initialization
+    getWordCountSpy.mockClear();
+
     // Don't mock updateWordCount and updateLastSavedTime - let them run normally
   });
 
@@ -90,7 +100,6 @@ describe('StatBarPlugin Integration Tests', () => {
     });
 
     test('should create status bar item on load', async () => {
-      await plugin.onload();
       expect(plugin.statusBarItemEl).toBeDefined();
       expect(plugin.statusBarItemEl).not.toBeNull();
     });
@@ -105,11 +114,6 @@ describe('StatBarPlugin Integration Tests', () => {
   });
 
   describe('Status bar updates', () => {
-    beforeEach(async () => {
-      await plugin.onload();
-      plugin.statusBarItemEl = mockStatusBarItem;
-    });
-
     test('should update status bar with word count only', () => {
       plugin.settings = {
         ...DEFAULT_SETTINGS,
@@ -214,11 +218,6 @@ describe('StatBarPlugin Integration Tests', () => {
   });
 
   describe('Tooltip functionality', () => {
-    beforeEach(async () => {
-      await plugin.onload();
-      plugin.statusBarItemEl = mockStatusBarItem;
-    });
-
     test('should set tooltip with detailed information', () => {
       plugin.settings = {
         ...DEFAULT_SETTINGS,
@@ -257,9 +256,7 @@ describe('StatBarPlugin Integration Tests', () => {
   });
 
   describe('Debounced updates', () => {
-    beforeEach(async () => {
-      await plugin.onload();
-      plugin.statusBarItemEl = mockStatusBarItem;
+    beforeEach(() => {
       jest.useFakeTimers();
     });
 
@@ -302,17 +299,10 @@ describe('StatBarPlugin Integration Tests', () => {
   });
 
   describe('Content caching', () => {
-    beforeEach(async () => {
-      await plugin.onload();
-      plugin.statusBarItemEl = mockStatusBarItem;
-    });
-
     test('should cache calculation results', () => {
       // Clear cache to ensure getWordCount is called
       (plugin as any).lastContentHash = '';
       (plugin as any).cachedStats = null;
-
-      const getWordCountSpy = jest.spyOn(plugin as any, 'getWordCount');
 
       // First call should calculate
       plugin.updateWordCount();
@@ -327,8 +317,6 @@ describe('StatBarPlugin Integration Tests', () => {
       // Clear cache to ensure getWordCount is called
       (plugin as any).lastContentHash = '';
       (plugin as any).cachedStats = null;
-
-      const getWordCountSpy = jest.spyOn(plugin as any, 'getWordCount');
 
       // First call
       plugin.updateWordCount();
@@ -353,11 +341,6 @@ describe('StatBarPlugin Integration Tests', () => {
   });
 
   describe('Read time label positioning', () => {
-    beforeEach(async () => {
-      await plugin.onload();
-      plugin.statusBarItemEl = mockStatusBarItem;
-    });
-
     test('should position read time label before when configured', () => {
       plugin.settings = {
         ...DEFAULT_SETTINGS,

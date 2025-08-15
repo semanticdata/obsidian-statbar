@@ -4,6 +4,7 @@ jest.mock('obsidian');
 import { PluginManifest } from 'obsidian';
 import StatBarPlugin from '../main';
 import { DEFAULT_SETTINGS } from '../src/settings';
+import { getWordCount, calculateReadTime } from '../src/stats';
 
 describe('StatBarPlugin Word Count Tests', () => {
   let plugin: StatBarPlugin;
@@ -53,49 +54,49 @@ describe('StatBarPlugin Word Count Tests', () => {
   describe('getWordCount', () => {
     test('should count simple words correctly', () => {
       const text = 'Hello world this is a test';
-      const result = (plugin as any).getWordCount(text);
+      const result = getWordCount(text);
       expect(result).toBe(6);
     });
 
     test('should handle empty string', () => {
       const text = '';
-      const result = (plugin as any).getWordCount(text);
+      const result = getWordCount(text);
       expect(result).toBe(0);
     });
 
     test('should handle whitespace only', () => {
       const text = '   \n\t   ';
-      const result = (plugin as any).getWordCount(text);
+      const result = getWordCount(text);
       expect(result).toBe(0);
     });
 
     test('should remove wiki links and count content', () => {
       const text = 'This is a [[wiki link]] in text';
-      const result = (plugin as any).getWordCount(text);
+      const result = getWordCount(text);
       expect(result).toBe(7); // 'This is a wiki link in text'
     });
 
     test('should remove markdown links and count content', () => {
       const text = 'This is a [markdown link](https://example.com) in text';
-      const result = (plugin as any).getWordCount(text);
+      const result = getWordCount(text);
       expect(result).toBe(7); // 'This is a markdown link in text'
     });
 
     test('should remove code blocks', () => {
       const text = 'Before code\n```\nconst x = 1;\nconsole.log(x);\n```\nAfter code';
-      const result = (plugin as any).getWordCount(text);
+      const result = getWordCount(text);
       expect(result).toBe(4); // 'Before code After code'
     });
 
     test('should remove inline code', () => {
       const text = 'This has `inline code` in it';
-      const result = (plugin as any).getWordCount(text);
+      const result = getWordCount(text);
       expect(result).toBe(4); // 'This has in it'
     });
 
     test('should remove markdown syntax', () => {
       const text = '# Heading\n**bold** *italic* `code` ~~strikethrough~~ > quote';
-      const result = (plugin as any).getWordCount(text);
+      const result = getWordCount(text);
       expect(result).toBe(5); // 'Heading bold italic strikethrough quote'
     });
 
@@ -110,20 +111,20 @@ describe('StatBarPlugin Word Count Tests', () => {
       
       More text with **bold** and *italic* formatting.`;
 
-      const result = (plugin as any).getWordCount(text);
+      const result = getWordCount(text);
       // Expected: 'My Document This is a paragraph with wiki links and markdown links More text with bold and italic formatting'
       expect(result).toBe(19);
     });
 
     test('should normalize multiple spaces', () => {
       const text = 'Word1    Word2\n\n\nWord3\t\tWord4';
-      const result = (plugin as any).getWordCount(text);
+      const result = getWordCount(text);
       expect(result).toBe(4);
     });
 
     test('should handle special characters', () => {
       const text = 'Hello, world! How are you? I\'m fine.';
-      const result = (plugin as any).getWordCount(text);
+      const result = getWordCount(text);
       expect(result).toBe(7); // 'Hello, world! How are you? I'm fine.'
     });
   });
@@ -131,37 +132,37 @@ describe('StatBarPlugin Word Count Tests', () => {
   describe('calculateReadTime', () => {
     test('should calculate read time correctly for default WPM', () => {
       plugin.settings.wordsPerMinute = 200;
-      const result = (plugin as any).calculateReadTime(400);
+      const result = calculateReadTime(400, plugin.settings.wordsPerMinute);
       expect(result).toBe('2:00'); // 400 words / 200 WPM = 2 minutes
     });
 
     test('should handle fractional minutes', () => {
       plugin.settings.wordsPerMinute = 200;
-      const result = (plugin as any).calculateReadTime(300);
+      const result = calculateReadTime(300, plugin.settings.wordsPerMinute);
       expect(result).toBe('1:30'); // 300 words / 200 WPM = 1.5 minutes = 1:30
     });
 
     test('should handle less than one minute', () => {
       plugin.settings.wordsPerMinute = 200;
-      const result = (plugin as any).calculateReadTime(50);
+      const result = calculateReadTime(50, plugin.settings.wordsPerMinute);
       expect(result).toBe('0:15'); // 50 words / 200 WPM = 0.25 minutes = 15 seconds
     });
 
     test('should handle zero words', () => {
       plugin.settings.wordsPerMinute = 200;
-      const result = (plugin as any).calculateReadTime(0);
+      const result = calculateReadTime(0, plugin.settings.wordsPerMinute);
       expect(result).toBe('0:00');
     });
 
     test('should handle custom WPM setting', () => {
       plugin.settings.wordsPerMinute = 150;
-      const result = (plugin as any).calculateReadTime(300);
+      const result = calculateReadTime(300, plugin.settings.wordsPerMinute);
       expect(result).toBe('2:00'); // 300 words / 150 WPM = 2 minutes
     });
 
     test('should round seconds correctly', () => {
       plugin.settings.wordsPerMinute = 200;
-      const result = (plugin as any).calculateReadTime(333);
+      const result = calculateReadTime(333, plugin.settings.wordsPerMinute);
       // 333 words / 200 WPM = 1.665 minutes = 1 minute 40 seconds (rounded)
       expect(result).toBe('1:40');
     });

@@ -8,6 +8,8 @@
 - Bump dependencies
 - Update `eslint` and `esbuild`
 - Consolidate event handlers, perf improvements
+- Refactor `main.ts` into smaller, single-responsibility modules (`modal`, `stats`, `types`) for improved maintainability.
+- Update test suite to accomodate new project structure.
 
 ### Added
 

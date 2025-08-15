@@ -3,6 +3,7 @@ jest.mock('obsidian');
 import { PluginManifest } from 'obsidian';
 import StatBarPlugin from '../main';
 import { DEFAULT_SETTINGS } from '../src/settings';
+import { getWordCount, calculateReadTime } from '../src/stats';
 
 describe('StatBarPlugin Edge Cases and Error Handling', () => {
   let plugin: StatBarPlugin;
@@ -265,64 +266,64 @@ describe('StatBarPlugin Edge Cases and Error Handling', () => {
 
   describe('calculateReadTime edge cases', () => {
     test('should handle zero word count', () => {
-      const readTime = (plugin as any).calculateReadTime(0);
+      const readTime = calculateReadTime(0, plugin.settings.wordsPerMinute);
       expect(readTime).toBe('0:00');
     });
 
     test('should handle very large word count', () => {
-      const readTime = (plugin as any).calculateReadTime(10000);
+      const readTime = calculateReadTime(10000, plugin.settings.wordsPerMinute);
       expect(readTime).toMatch(/^\d+:\d{2}$/);
     });
 
     test('should handle custom words per minute setting', () => {
       plugin.settings.wordsPerMinute = 100;
-      const readTime = (plugin as any).calculateReadTime(200);
+      const readTime = calculateReadTime(200, plugin.settings.wordsPerMinute);
       expect(readTime).toBe('2:00');
     });
 
     test('should format seconds with leading zero', () => {
       plugin.settings.wordsPerMinute = 200;
-      const readTime = (plugin as any).calculateReadTime(17); // Should be about 5 seconds
+      const readTime = calculateReadTime(17, plugin.settings.wordsPerMinute); // Should be about 5 seconds
       expect(readTime).toMatch(/^\d+:0\d$/);
     });
   });
 
   describe('getWordCount edge cases', () => {
     test('should handle text with only punctuation', () => {
-      const wordCount = (plugin as any).getWordCount('!@#$%^&*()');
+      const wordCount = getWordCount('!@#$%^&*()');
       expect(wordCount).toBe(1);
     });
 
     test('should handle text with only whitespace', () => {
-      const wordCount = (plugin as any).getWordCount('   \n\t   ');
+      const wordCount = getWordCount('   \n\t   ');
       expect(wordCount).toBe(0);
     });
 
     test('should handle empty string', () => {
-      const wordCount = (plugin as any).getWordCount('');
+      const wordCount = getWordCount('');
       expect(wordCount).toBe(0);
     });
 
     test('should handle text with multiple consecutive spaces', () => {
-      const wordCount = (plugin as any).getWordCount('word1     word2     word3');
+      const wordCount = getWordCount('word1     word2     word3');
       expect(wordCount).toBe(3);
     });
 
     test('should handle text with mixed markdown and content', () => {
       const text = '# Header\n\n**Bold text** and *italic text* with `inline code`';
-      const wordCount = (plugin as any).getWordCount(text);
+      const wordCount = getWordCount(text);
       expect(wordCount).toBeGreaterThan(0);
     });
 
     test('should handle complex wiki links', () => {
       const text = '[[Complex Link|Display Text]] and [[Simple Link]]';
-      const wordCount = (plugin as any).getWordCount(text);
+      const wordCount = getWordCount(text);
       expect(wordCount).toBe(6); // "Complex Link Display Text and Simple Link"
     });
 
     test('should handle nested code blocks', () => {
       const text = '```\ncode block\nwith multiple lines\n```\nregular text';
-      const wordCount = (plugin as any).getWordCount(text);
+      const wordCount = getWordCount(text);
       expect(wordCount).toBe(2); // Only "regular text"
     });
   });
