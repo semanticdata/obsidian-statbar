@@ -1,6 +1,6 @@
 import { DEFAULT_SETTINGS, MyPluginSettings, StatBarSettingTab } from '../src/settings';
-import { App, PluginSettingTab, Setting } from 'obsidian';
-import StatBarPlugin from '../main';
+import { PluginSettingTab } from 'obsidian';
+
 
 describe('Settings Tests', () => {
   describe('DEFAULT_SETTINGS', () => {

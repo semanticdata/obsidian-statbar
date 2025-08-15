@@ -1,7 +1,7 @@
 // Mock Obsidian API before importing
 jest.mock('obsidian');
 
-import { App, Plugin, PluginManifest } from 'obsidian';
+import { PluginManifest } from 'obsidian';
 import StatBarPlugin from '../main';
 import { DEFAULT_SETTINGS } from '../src/settings';
 
