@@ -16,6 +16,9 @@ export const DEFAULT_SETTINGS: MyPluginSettings = {
 	wordsPerMinute: 200,
 	showSelectionStats: true,
 	selectionPrefix: "[SEL]",
+	showCursorLocation: false,
+	cursorLocationLabel: "Cursor:",
+	cursorLocationFormat: "Ln {line}, Col {char}",
 };
 
 import StatBarPlugin from "../main"; // Fixed import path to parent directory
@@ -99,6 +102,21 @@ export class StatBarSettingTab extends PluginSettingTab {
 					.setValue(this.plugin.settings.showSelectionStats)
 					.onChange(async (value) => {
 						this.plugin.settings.showSelectionStats = value;
+						await this.plugin.saveSettings();
+						this.plugin.updateWordCount(); // Update display immediately
+					}),
+			);
+
+		new Setting(containerEl)
+			.setName("Show Cursor Location")
+			.setDesc(
+				"Toggle to display the cursor position (line and column) in the status bar.",
+			)
+			.addToggle((toggle) =>
+				toggle
+					.setValue(this.plugin.settings.showCursorLocation)
+					.onChange(async (value) => {
+						this.plugin.settings.showCursorLocation = value;
 						await this.plugin.saveSettings();
 						this.plugin.updateWordCount(); // Update display immediately
 					}),
@@ -218,6 +236,34 @@ export class StatBarSettingTab extends PluginSettingTab {
 					.setValue(this.plugin.settings.selectionPrefix)
 					.onChange(async (value) => {
 						this.plugin.settings.selectionPrefix = value;
+						await this.plugin.saveSettings();
+						this.plugin.updateWordCount(); // Update display immediately
+					}),
+			);
+
+		new Setting(containerEl)
+			.setName("Cursor Location Label")
+			.setDesc("Customize the label for the cursor location.")
+			.addText((text) =>
+				text
+					.setValue(this.plugin.settings.cursorLocationLabel)
+					.onChange(async (value) => {
+						this.plugin.settings.cursorLocationLabel = value;
+						await this.plugin.saveSettings();
+						this.plugin.updateWordCount(); // Update display immediately
+					}),
+			);
+
+		new Setting(containerEl)
+			.setName("Cursor Location Format")
+			.setDesc(
+				"Customize the format for cursor location. Use {line} and {char} as placeholders.",
+			)
+			.addText((text) =>
+				text
+					.setValue(this.plugin.settings.cursorLocationFormat)
+					.onChange(async (value) => {
+						this.plugin.settings.cursorLocationFormat = value;
 						await this.plugin.saveSettings();
 						this.plugin.updateWordCount(); // Update display immediately
 					}),

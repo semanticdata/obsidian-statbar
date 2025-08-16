@@ -15,6 +15,8 @@ export interface EditorContext {
 	currentText: string;
 	charCount: number;
 	charNoSpaces: number;
+	cursorLine: number;
+	cursorCharacter: number;
 }
 
 export type ReadTimeLabelPosition = "before" | "after";
@@ -33,4 +35,7 @@ export interface MyPluginSettings {
 	lastSavedTimeLabel: string;
 	showSelectionStats: boolean;
 	selectionPrefix: string;
+	showCursorLocation: boolean;
+	cursorLocationLabel: string;
+	cursorLocationFormat: string;
 }

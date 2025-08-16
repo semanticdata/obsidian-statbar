@@ -109,6 +109,21 @@ export class DetailedStatsModal extends Modal {
 			cls: "statbar-stat-note",
 		});
 
+		// Cursor location (if enabled)
+		if (this.plugin.settings.showCursorLocation) {
+			const cursorEl = statsContainer.createEl("div", {
+				cls: "statbar-stat-item",
+			});
+			cursorEl.createEl("span", {
+				text: "Cursor position: ",
+				cls: "statbar-stat-label",
+			});
+			cursorEl.createEl("span", {
+				text: `Line ${context.cursorLine}, Column ${context.cursorCharacter}`,
+				cls: "statbar-stat-value",
+			});
+		}
+
 		// If there's a selection, also show document stats
 		if (context.isSelection) {
 			const fullStats = this.statsService.calculateFullDocumentStats(

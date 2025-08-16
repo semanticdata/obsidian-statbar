@@ -20,6 +20,7 @@ StatBar adds a word and character counter to the status bar in Obsidian. It upda
     - Character count
     - Estimated read time
     - Last saved time
+    - Cursor location (Line and Character)
 
 ## 📦 Installation
 

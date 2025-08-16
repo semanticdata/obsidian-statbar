@@ -14,6 +14,8 @@ export function getEditorContext(app: App): EditorContext {
 			currentText: "",
 			charCount: 0,
 			charNoSpaces: 0,
+			cursorLine: 0,
+			cursorCharacter: 0,
 		};
 	}
 
@@ -30,6 +32,11 @@ export function getEditorContext(app: App): EditorContext {
 	const isSelection = hasSelection && selectedText.length > 0;
 	const currentText = isSelection ? selectedText : fullText;
 
+	// Get cursor position (use "from" cursor for selections, main cursor otherwise)
+	const cursor = hasSelection ? fromCursor : editor.getCursor();
+	const cursorLine = cursor.line + 1; // Convert to 1-based indexing
+	const cursorCharacter = cursor.ch + 1; // Convert to 1-based indexing
+
 	return {
 		hasActiveView: true,
 		hasSelection,
@@ -39,5 +46,7 @@ export function getEditorContext(app: App): EditorContext {
 		currentText,
 		charCount: currentText.length,
 		charNoSpaces: currentText.replace(/\s/g, "").length,
+		cursorLine,
+		cursorCharacter,
 	};
 }

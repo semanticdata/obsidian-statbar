@@ -27,9 +27,10 @@
     - Add prettier check to CI
     - Add `.prettierignore` file
     - Add new dependency `eslint-config-prettier`
-- Add `EditorContext` service for centralized editor state management
-- Add `StatsService` class with built-in caching for performance optimization
-- Add comprehensive unit tests for new shared services and refactored methods
+- Add `EditorContext` service for centralized editor state management.
+- Add `StatsService` class with built-in caching for performance optimization.
+- Add comprehensive unit tests for new shared services and refactored methods.
+- Add Cursor location component to show line and character number.
 
 ## 1.0.0 - 2025-01-30
 
