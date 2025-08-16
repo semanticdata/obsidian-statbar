@@ -132,6 +132,14 @@ export default class StatBarPlugin extends Plugin {
 			}
 		}
 
+		if (this.settings.showCursorLocation) {
+			if (statusText) statusText += ` ${this.settings.separatorLabel} `;
+			const cursorText = this.settings.cursorLocationFormat
+				.replace("{line}", context.cursorLine.toString())
+				.replace("{char}", context.cursorCharacter.toString());
+			statusText += `${this.settings.cursorLocationLabel} ${cursorText}`;
+		}
+
 		return statusText.trim();
 	}
 
@@ -145,12 +153,17 @@ export default class StatBarPlugin extends Plugin {
 				? `Selected text (${context.selectedText.length} chars)\n`
 				: "Full document\n";
 
+		const cursorInfo = this.settings.showCursorLocation 
+			? `\nCursor: Line ${context.cursorLine}, Column ${context.cursorCharacter}`
+			: "";
+
 		return (
 			tooltipPrefix +
 			scopeInfo +
 			`Words: ${stats.wordCount.toLocaleString()}\n` +
 			`Characters: ${stats.charCount.toLocaleString()} (${context.charNoSpaces.toLocaleString()} no spaces)\n` +
-			`Estimated Read Time: ${stats.readTime} minutes`
+			`Estimated Read Time: ${stats.readTime} minutes` +
+			cursorInfo
 		);
 	}
 
