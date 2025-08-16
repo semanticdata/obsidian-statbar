@@ -10,6 +10,7 @@
 - Consolidate event handlers, perf improvements
 - Refactor `main.ts` into smaller, single-responsibility modules (`modal`, `stats`, `types`) for improved maintainability.
 - Update test suite to accomodate new project structure.
+- Improve `getWordCount` regex to handle abbreviations properly.
 
 ### Added
 

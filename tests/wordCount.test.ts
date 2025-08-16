@@ -130,6 +130,18 @@ describe("StatBarPlugin Word Count Tests", () => {
 			const result = getWordCount(text);
 			expect(result).toBe(7); // 'Hello, world! How are you? I'm fine.'
 		});
+
+		test("should preserve abbreviations correctly", () => {
+			const text = "This is an example, e.g., of abbreviations like i.e. and etc.";
+			const result = getWordCount(text);
+			expect(result).toBe(11); // 'This is an example e.g of abbreviations like i.e and etc'
+		});
+
+		test("should handle contractions properly", () => {
+			const text = "I can't believe it's working! We're testing don't and won't.";
+			const result = getWordCount(text);
+			expect(result).toBe(10); // 'I can't believe it's working We're testing don't and won't'
+		});
 	});
 
 	describe("calculateReadTime", () => {

@@ -318,7 +318,7 @@ describe("StatBarPlugin Edge Cases and Error Handling", () => {
 	describe("getWordCount edge cases", () => {
 		test("should handle text with only punctuation", () => {
 			const wordCount = getWordCount("!@#$%^&*()");
-			expect(wordCount).toBe(1);
+			expect(wordCount).toBe(0);
 		});
 
 		test("should handle text with only whitespace", () => {
