@@ -1,21 +1,6 @@
 import { App, PluginSettingTab, Setting } from "obsidian";
 import { PLUGIN_NAME } from "./constants";
-
-export interface MyPluginSettings {
-	showWordCount: boolean;
-	showCharCount: boolean;
-	wordLabel: string;
-	charLabel: string;
-	showReadTime: boolean;
-	readTimeLabel: string;
-	readTimeLabelPosition: "before" | "after";
-	separatorLabel: string;
-	wordsPerMinute: number;
-	showLastSavedTime: boolean;
-	lastSavedTimeLabel: string;
-	showSelectionStats: boolean;
-	selectionPrefix: string;
-}
+import { MyPluginSettings, ReadTimeLabelPosition } from "./types";
 
 export const DEFAULT_SETTINGS: MyPluginSettings = {
 	showWordCount: true,
@@ -187,9 +172,8 @@ export class StatBarSettingTab extends PluginSettingTab {
 					.addOption("after", "After")
 					.setValue(this.plugin.settings.readTimeLabelPosition)
 					.onChange(async (value) => {
-						this.plugin.settings.readTimeLabelPosition = value as
-							| "before"
-							| "after";
+						this.plugin.settings.readTimeLabelPosition =
+							value as ReadTimeLabelPosition;
 						await this.plugin.saveSettings();
 						this.plugin.updateWordCount(); // Update display immediately
 					}),

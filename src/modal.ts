@@ -1,9 +1,11 @@
-import { App, Modal, MarkdownView } from "obsidian";
+import { App, Modal } from "obsidian";
 import StatBarPlugin from "../main";
-import { getWordCount, calculateReadTime } from "./stats";
+import { getEditorContext } from "./editor-context";
+import { StatsService } from "./stats-service";
 
 export class DetailedStatsModal extends Modal {
 	plugin: StatBarPlugin;
+	private statsService = new StatsService();
 
 	constructor(app: App, plugin: StatBarPlugin) {
 		super(app);
@@ -14,40 +16,27 @@ export class DetailedStatsModal extends Modal {
 		const { contentEl } = this;
 		contentEl.empty();
 
-		// Get current stats
-		const activeView = this.app.workspace.getActiveViewOfType(MarkdownView);
-		if (!activeView) {
+		// Get current editor context
+		const context = getEditorContext(this.app);
+		if (!context.hasActiveView) {
 			contentEl.createEl("p", { text: "No active markdown file" });
 			return;
 		}
 
-		const editor = activeView.editor;
-		const fromCursor = editor.getCursor("from");
-		const toCursor = editor.getCursor("to");
-		const hasSelection =
-			fromCursor.line !== toCursor.line || fromCursor.ch !== toCursor.ch;
-		const selectedText = hasSelection ? editor.getSelection() : "";
-		const fullText = activeView.getViewData();
-		const isSelection = hasSelection && selectedText.length > 0;
-
-		// Calculate stats for both selection and full document
-		const currentText = isSelection ? selectedText : fullText;
-		const wordCount = getWordCount(currentText);
-		const charCount = currentText.length;
-		const charNoSpaces = currentText.replace(/\s/g, "").length;
-		const readTime = calculateReadTime(
-			wordCount,
-			this.plugin.settings.wordsPerMinute,
+		// Calculate stats for current context (selection or full document)
+		const stats = this.statsService.calculateStats(
+			context,
+			this.plugin.settings,
 		);
 
 		// Current scope indicator (serves as main header)
-		if (isSelection) {
+		if (context.isSelection) {
 			const scopeEl = contentEl.createEl("div", {
 				cls: "statbar-modal-scope",
 			});
 			scopeEl.createEl("strong", { text: "📝 Selection Statistics" });
 			scopeEl.createEl("p", {
-				text: `Analyzing selected text (${selectedText.length} characters)`,
+				text: `Analyzing selected text (${context.selectedText.length} characters)`,
 			});
 		} else {
 			const scopeEl = contentEl.createEl("div", {
@@ -68,7 +57,7 @@ export class DetailedStatsModal extends Modal {
 		});
 		wordEl.createEl("span", { text: "Words: ", cls: "statbar-stat-label" });
 		wordEl.createEl("span", {
-			text: wordCount.toLocaleString(),
+			text: stats.wordCount.toLocaleString(),
 			cls: "statbar-stat-value",
 		});
 
@@ -81,7 +70,7 @@ export class DetailedStatsModal extends Modal {
 			cls: "statbar-stat-label",
 		});
 		charEl.createEl("span", {
-			text: charCount.toLocaleString(),
+			text: stats.charCount.toLocaleString(),
 			cls: "statbar-stat-value",
 		});
 
@@ -94,7 +83,7 @@ export class DetailedStatsModal extends Modal {
 			cls: "statbar-stat-label",
 		});
 		charNoSpacesEl.createEl("span", {
-			text: charNoSpaces.toLocaleString(),
+			text: context.charNoSpaces.toLocaleString(),
 			cls: "statbar-stat-value",
 		});
 
@@ -107,7 +96,7 @@ export class DetailedStatsModal extends Modal {
 			cls: "statbar-stat-label",
 		});
 		readTimeEl.createEl("span", {
-			text: `${readTime} minutes`,
+			text: `${stats.readTime} minutes`,
 			cls: "statbar-stat-value",
 		});
 
@@ -121,12 +110,10 @@ export class DetailedStatsModal extends Modal {
 		});
 
 		// If there's a selection, also show document stats
-		if (isSelection) {
-			const fullWordCount = getWordCount(fullText);
-			const fullCharCount = fullText.length;
-			const fullReadTime = calculateReadTime(
-				fullWordCount,
-				this.plugin.settings.wordsPerMinute,
+		if (context.isSelection) {
+			const fullStats = this.statsService.calculateFullDocumentStats(
+				context.fullText,
+				this.plugin.settings,
 			);
 
 			contentEl.createEl("hr");
@@ -144,7 +131,7 @@ export class DetailedStatsModal extends Modal {
 				cls: "statbar-stat-label",
 			});
 			fullWordEl.createEl("span", {
-				text: fullWordCount.toLocaleString(),
+				text: fullStats.wordCount.toLocaleString(),
 				cls: "statbar-stat-value",
 			});
 
@@ -156,7 +143,7 @@ export class DetailedStatsModal extends Modal {
 				cls: "statbar-stat-label",
 			});
 			fullCharEl.createEl("span", {
-				text: fullCharCount.toLocaleString(),
+				text: fullStats.charCount.toLocaleString(),
 				cls: "statbar-stat-value",
 			});
 
@@ -168,7 +155,7 @@ export class DetailedStatsModal extends Modal {
 				cls: "statbar-stat-label",
 			});
 			fullReadTimeEl.createEl("span", {
-				text: `${fullReadTime} minutes`,
+				text: `${fullStats.readTime} minutes`,
 				cls: "statbar-stat-value",
 			});
 		}

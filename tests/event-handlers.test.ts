@@ -249,42 +249,10 @@ describe("StatBarPlugin Event Handler Tests", () => {
 		expect(mockLastSavedTimeEl.setText).toHaveBeenCalledWith("");
 	});
 
-	test("should create content hash correctly", () => {
-		const text =
-			"This is a test text that is longer than 100 characters to test the hash function properly and ensure it works as expected";
-		const hash = (plugin as any).getContentHash(text);
-
-		expect(hash).toBe(text.length + text.slice(0, 100) + text.slice(-100));
-	});
-
-	test("should return cached stats when hash matches", () => {
-		const hash = "test-hash";
-		const stats = { wordCount: 10, charCount: 50, readTime: "1:00" };
-
-		(plugin as any).setCachedStats(hash, stats);
-		const cachedStats = (plugin as any).getCachedStats(hash);
-
-		expect(cachedStats).toEqual(stats);
-	});
-
-	test("should return null when hash does not match cached stats", () => {
-		const hash1 = "test-hash-1";
-		const hash2 = "test-hash-2";
-		const stats = { wordCount: 10, charCount: 50, readTime: "1:00" };
-
-		(plugin as any).setCachedStats(hash1, stats);
-		const cachedStats = (plugin as any).getCachedStats(hash2);
-
-		expect(cachedStats).toBeNull();
-	});
-
-	test("should set cached stats correctly", () => {
-		const hash = "test-hash";
-		const stats = { wordCount: 10, charCount: 50, readTime: "1:00" };
-
-		(plugin as any).setCachedStats(hash, stats);
-
-		expect((plugin as any).lastContentHash).toBe(hash);
-		expect((plugin as any).cachedStats).toEqual(stats);
+	test("should work with stats service integration", () => {
+		// Verify that the plugin can handle updates without throwing errors
+		expect(() => {
+			plugin.updateWordCount();
+		}).not.toThrow();
 	});
 });

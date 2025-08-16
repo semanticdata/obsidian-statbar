@@ -21,17 +21,14 @@ export function getWordCount(text: string): number {
 	// Remove markdown syntax characters
 	cleanText = cleanText.replace(/[#*_~>]/g, "");
 
-	// Remove punctuation that might be attached to words
-	cleanText = cleanText.replace(/[.,!?;:]/g, " ");
+	// Split into words and trim punctuation from each word
+	// This preserves abbreviations like "e.g." and "i.e."
+	const words = cleanText
+		.split(/\s+/)
+		.map((word) => word.replace(/^[^\w\s]+|[^\w\s]+$/g, ""))
+		.filter((word) => word.length > 0);
 
-	// Normalize whitespace
-	cleanText = cleanText.replace(/\s+/g, " ").trim();
-
-	debugLog("After cleaning:", cleanText);
-
-	// Final word count calculation
-	if (!cleanText) return 0;
-	const words = cleanText.split(/\s+/).filter((word) => word.length > 0);
+	debugLog("After cleaning:", words.join(" "));
 	debugLog("Words array:", words);
 	debugLog("Word count:", words.length);
 

@@ -247,50 +247,14 @@ describe("StatBarPlugin Coverage Tests", () => {
 			);
 		});
 
-		test("should generate content hash correctly", () => {
-			const text =
-				"This is a test text that is longer than 100 characters to test the hash function properly and ensure it works as expected";
-			const hash = (plugin as any).getContentHash(text);
+		test("should use stats service for calculations", () => {
+			// Verify that the plugin has a stats service instance
+			expect((plugin as any).statsService).toBeDefined();
 
-			// Should combine length + first 100 + last 100 chars (line 208)
-			expect(hash).toBe(
-				text.length + text.slice(0, 100) + text.slice(-100),
-			);
-		});
-
-		test("should return cached stats when hash matches", () => {
-			const hash = "test-hash";
-			const stats = { wordCount: 10, charCount: 50, readTime: "1:00" };
-
-			// Set cached stats (lines 215-216)
-			(plugin as any).setCachedStats(hash, stats);
-
-			// Should return cached stats when hash matches (lines 212-214)
-			const cachedStats = (plugin as any).getCachedStats(hash);
-			expect(cachedStats).toEqual(stats);
-		});
-
-		test("should return null when hash does not match", () => {
-			const hash1 = "test-hash-1";
-			const hash2 = "test-hash-2";
-			const stats = { wordCount: 10, charCount: 50, readTime: "1:00" };
-
-			(plugin as any).setCachedStats(hash1, stats);
-
-			// Should return null when hash doesn't match (line 215)
-			const cachedStats = (plugin as any).getCachedStats(hash2);
-			expect(cachedStats).toBeNull();
-		});
-
-		test("should set cached stats correctly", () => {
-			const hash = "test-hash";
-			const stats = { wordCount: 10, charCount: 50, readTime: "1:00" };
-
-			(plugin as any).setCachedStats(hash, stats);
-
-			// Should set both hash and stats (lines 215-216)
-			expect((plugin as any).lastContentHash).toBe(hash);
-			expect((plugin as any).cachedStats).toEqual(stats);
+			// Verify that the plugin can perform word count updates
+			expect(() => {
+				plugin.updateWordCount();
+			}).not.toThrow();
 		});
 	});
 

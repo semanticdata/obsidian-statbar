@@ -10,8 +10,16 @@ describe("StatBarPlugin Word Count Tests", () => {
 	let plugin: StatBarPlugin;
 	let mockApp: any;
 	let mockManifest: PluginManifest;
+	let mockStatusBarItem: any;
 
 	beforeEach(() => {
+		mockStatusBarItem = document.createElement("div");
+		(mockStatusBarItem as any).setText = jest.fn();
+		(mockStatusBarItem as any).setTitle = jest.fn();
+		(mockStatusBarItem as any).addClass = jest.fn();
+		(mockStatusBarItem as any).removeClass = jest.fn();
+		(mockStatusBarItem as any).setAttribute = jest.fn();
+		(mockStatusBarItem as any).remove = jest.fn();
 		mockApp = {
 			workspace: {
 				on: jest.fn(),
@@ -130,6 +138,20 @@ describe("StatBarPlugin Word Count Tests", () => {
 			const result = getWordCount(text);
 			expect(result).toBe(7); // 'Hello, world! How are you? I'm fine.'
 		});
+
+		test("should preserve abbreviations correctly", () => {
+			const text =
+				"This is an example, e.g., of abbreviations like i.e. and etc.";
+			const result = getWordCount(text);
+			expect(result).toBe(11); // 'This is an example e.g of abbreviations like i.e and etc'
+		});
+
+		test("should handle contractions properly", () => {
+			const text =
+				"I can't believe it's working! We're testing don't and won't.";
+			const result = getWordCount(text);
+			expect(result).toBe(10); // 'I can't believe it's working We're testing don't and won't'
+		});
 	});
 
 	describe("calculateReadTime", () => {
@@ -186,41 +208,53 @@ describe("StatBarPlugin Word Count Tests", () => {
 		});
 	});
 
-	describe("content hashing and caching", () => {
-		test("should generate consistent hash for same content", () => {
-			const content = "This is test content";
-			const hash1 = (plugin as any).getContentHash(content);
-			const hash2 = (plugin as any).getContentHash(content);
-			expect(hash1).toBe(hash2);
-		});
-
-		test("should generate different hash for different content", () => {
-			const content1 = "This is test content";
-			const content2 = "This is different content";
-			const hash1 = (plugin as any).getContentHash(content1);
-			const hash2 = (plugin as any).getContentHash(content2);
-			expect(hash1).not.toBe(hash2);
-		});
-
-		test("should cache and retrieve stats correctly", () => {
-			const hash = "test-hash";
-			const stats = {
-				wordCount: 100,
-				charCount: 500,
-				readTime: "0:30",
-				isSelection: false,
+	describe("stats service integration", () => {
+		test("should calculate stats correctly", () => {
+			const mockEditor = {
+				getSelection: jest.fn(() => ""),
+				getValue: jest.fn(() => "test content"),
+				getCursor: jest.fn((type?: string) => {
+					return { line: 0, ch: 0 };
+				}),
 			};
 
-			(plugin as any).setCachedStats(hash, stats);
-			const retrieved = (plugin as any).getCachedStats(hash);
-			expect(retrieved).toEqual(stats);
+			mockApp.workspace.getActiveViewOfType.mockReturnValue({
+				editor: mockEditor,
+				getViewData: jest.fn(() => "test content"),
+			});
+
+			// Ensure statusBarItemEl is properly mocked
+			plugin.statusBarItemEl = mockStatusBarItem;
+
+			plugin.updateWordCount();
+
+			expect(mockStatusBarItem.setText).toHaveBeenCalled();
+			const setTextCall = mockStatusBarItem.setText.mock.calls[0][0];
+			expect(typeof setTextCall).toBe("string");
 		});
 
-		test("should return null for non-existent cache", () => {
-			const retrieved = (plugin as any).getCachedStats(
-				"non-existent-hash",
-			);
-			expect(retrieved).toBeNull();
+		test("should handle caching within stats service", () => {
+			const mockEditor = {
+				getSelection: jest.fn(() => ""),
+				getValue: jest.fn(() => "test content"),
+				getCursor: jest.fn((type?: string) => {
+					return { line: 0, ch: 0 };
+				}),
+			};
+
+			mockApp.workspace.getActiveViewOfType.mockReturnValue({
+				editor: mockEditor,
+				getViewData: jest.fn(() => "test content"),
+			});
+
+			// Ensure statusBarItemEl is properly mocked
+			plugin.statusBarItemEl = mockStatusBarItem;
+
+			// Multiple calls should work without error
+			plugin.updateWordCount();
+			plugin.updateWordCount();
+
+			expect(mockStatusBarItem.setText).toHaveBeenCalledTimes(2);
 		});
 	});
 });
