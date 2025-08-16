@@ -2,8 +2,8 @@ jest.mock("obsidian");
 jest.mock("../src/stats");
 
 import { StatsService } from "../src/stats-service";
-import { EditorContext } from "../src/editor-context";
-import { MyPluginSettings, DEFAULT_SETTINGS } from "../src/settings";
+import { EditorContext, MyPluginSettings } from "../src/types";
+import { DEFAULT_SETTINGS } from "../src/settings";
 import { getWordCount, calculateReadTime } from "../src/stats";
 
 const mockGetWordCount = getWordCount as jest.MockedFunction<typeof getWordCount>;

@@ -3,8 +3,7 @@ jest.mock("obsidian");
 import { PluginManifest } from "obsidian";
 import StatBarPlugin from "../main";
 import { DEFAULT_SETTINGS } from "../src/settings";
-import { EditorContext } from "../src/editor-context";
-import { DocumentStats } from "../src/types";
+import { EditorContext, DocumentStats } from "../src/types";
 
 describe("StatBarPlugin Refactored Methods", () => {
 	let plugin: StatBarPlugin;

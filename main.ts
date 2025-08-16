@@ -1,12 +1,11 @@
 import { App, MarkdownView, Plugin, PluginManifest } from "obsidian";
 import {
 	StatBarSettingTab,
-	MyPluginSettings,
 	DEFAULT_SETTINGS,
 } from "./src/settings";
-import { getEditorContext, EditorContext } from "./src/editor-context";
+import { getEditorContext } from "./src/editor-context";
 import { StatsService } from "./src/stats-service";
-import { DocumentStats } from "./src/types";
+import { DocumentStats, EditorContext, MyPluginSettings } from "./src/types";
 import { DetailedStatsModal } from "./src/modal";
 
 export default class StatBarPlugin extends Plugin {

@@ -1,15 +1,5 @@
 import { App, MarkdownView } from "obsidian";
-
-export interface EditorContext {
-	hasActiveView: boolean;
-	hasSelection: boolean;
-	isSelection: boolean;
-	selectedText: string;
-	fullText: string;
-	currentText: string;
-	charCount: number;
-	charNoSpaces: number;
-}
+import { EditorContext } from "./types";
 
 export function getEditorContext(app: App): EditorContext {
 	const activeView = app.workspace.getActiveViewOfType(MarkdownView);

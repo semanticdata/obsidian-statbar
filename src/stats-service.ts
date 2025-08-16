@@ -1,6 +1,4 @@
-import { EditorContext } from "./editor-context";
-import { DocumentStats } from "./types";
-import { MyPluginSettings } from "./settings";
+import { EditorContext, DocumentStats, MyPluginSettings } from "./types";
 import { getWordCount, calculateReadTime } from "./stats";
 
 export class StatsService {
