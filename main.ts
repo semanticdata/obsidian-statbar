@@ -153,7 +153,7 @@ export default class StatBarPlugin extends Plugin {
 				? `Selected text (${context.selectedText.length} chars)\n`
 				: "Full document\n";
 
-		const cursorInfo = this.settings.showCursorLocation 
+		const cursorInfo = this.settings.showCursorLocation
 			? `\nCursor: Line ${context.cursorLine}, Column ${context.cursorCharacter}`
 			: "";
 

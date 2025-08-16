@@ -109,7 +109,9 @@ export class StatBarSettingTab extends PluginSettingTab {
 
 		new Setting(containerEl)
 			.setName("Show Cursor Location")
-			.setDesc("Toggle to display the cursor position (line and column) in the status bar.")
+			.setDesc(
+				"Toggle to display the cursor position (line and column) in the status bar.",
+			)
 			.addToggle((toggle) =>
 				toggle
 					.setValue(this.plugin.settings.showCursorLocation)
@@ -254,7 +256,9 @@ export class StatBarSettingTab extends PluginSettingTab {
 
 		new Setting(containerEl)
 			.setName("Cursor Location Format")
-			.setDesc("Customize the format for cursor location. Use {line} and {char} as placeholders.")
+			.setDesc(
+				"Customize the format for cursor location. Use {line} and {char} as placeholders.",
+			)
 			.addText((text) =>
 				text
 					.setValue(this.plugin.settings.cursorLocationFormat)
