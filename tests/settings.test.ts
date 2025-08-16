@@ -1,7 +1,4 @@
-import {
-	DEFAULT_SETTINGS,
-	StatBarSettingTab,
-} from "../src/settings";
+import { DEFAULT_SETTINGS, StatBarSettingTab } from "../src/settings";
 import { MyPluginSettings } from "../src/types";
 import { PluginSettingTab } from "obsidian";
 

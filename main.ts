@@ -1,8 +1,5 @@
 import { App, MarkdownView, Plugin, PluginManifest } from "obsidian";
-import {
-	StatBarSettingTab,
-	DEFAULT_SETTINGS,
-} from "./src/settings";
+import { StatBarSettingTab, DEFAULT_SETTINGS } from "./src/settings";
 import { getEditorContext } from "./src/editor-context";
 import { StatsService } from "./src/stats-service";
 import { DocumentStats, EditorContext, MyPluginSettings } from "./src/types";
@@ -101,7 +98,10 @@ export default class StatBarPlugin extends Plugin {
 		this.statusBarItemEl.setAttribute("aria-label", "");
 	}
 
-	private buildStatusText(context: EditorContext, stats: DocumentStats): string {
+	private buildStatusText(
+		context: EditorContext,
+		stats: DocumentStats,
+	): string {
 		// Add selection prefix if text is selected and setting is enabled
 		const selectionPrefix =
 			context.isSelection && this.settings.showSelectionStats
@@ -109,24 +109,22 @@ export default class StatBarPlugin extends Plugin {
 				: "";
 
 		let statusText = "";
-		
+
 		if (this.settings.showWordCount) {
 			statusText += `${selectionPrefix}${
 				this.settings.wordLabel
 			} ${stats.wordCount.toLocaleString()}`;
 		}
-		
+
 		if (this.settings.showCharCount) {
-			if (statusText)
-				statusText += ` ${this.settings.separatorLabel} `;
+			if (statusText) statusText += ` ${this.settings.separatorLabel} `;
 			statusText += `${
 				this.settings.charLabel
 			} ${stats.charCount.toLocaleString()}`;
 		}
-		
+
 		if (this.settings.showReadTime) {
-			if (statusText)
-				statusText += ` ${this.settings.separatorLabel} `;
+			if (statusText) statusText += ` ${this.settings.separatorLabel} `;
 			if (this.settings.readTimeLabelPosition === "before") {
 				statusText += `${this.settings.readTimeLabel} ${stats.readTime}`;
 			} else {
@@ -147,16 +145,18 @@ export default class StatBarPlugin extends Plugin {
 				? `Selected text (${context.selectedText.length} chars)\n`
 				: "Full document\n";
 
-		return tooltipPrefix +
+		return (
+			tooltipPrefix +
 			scopeInfo +
 			`Words: ${stats.wordCount.toLocaleString()}\n` +
 			`Characters: ${stats.charCount.toLocaleString()} (${context.charNoSpaces.toLocaleString()} no spaces)\n` +
-			`Estimated Read Time: ${stats.readTime} minutes`;
+			`Estimated Read Time: ${stats.readTime} minutes`
+		);
 	}
 
 	private updateStatusBarDisplay(statusText: string, tooltip: string): void {
 		this.statusBarItemEl.setText(statusText);
-		
+
 		if (statusText) {
 			this.statusBarItemEl.setAttribute("aria-label", tooltip);
 		} else {
@@ -175,7 +175,7 @@ export default class StatBarPlugin extends Plugin {
 		const stats = this.statsService.calculateStats(context, this.settings);
 		const statusText = this.buildStatusText(context, stats);
 		const tooltip = statusText ? this.buildTooltip(context, stats) : "";
-		
+
 		this.updateStatusBarDisplay(statusText, tooltip);
 	}
 

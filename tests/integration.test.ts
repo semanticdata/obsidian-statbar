@@ -322,7 +322,7 @@ describe("StatBarPlugin Integration Tests", () => {
 		test("should handle content changes", () => {
 			// Reset mock call count
 			mockStatusBarItem.setText.mockClear();
-			
+
 			// First call
 			plugin.updateWordCount();
 			expect(mockStatusBarItem.setText).toHaveBeenCalledTimes(1);

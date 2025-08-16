@@ -250,7 +250,7 @@ describe("StatBarPlugin Coverage Tests", () => {
 		test("should use stats service for calculations", () => {
 			// Verify that the plugin has a stats service instance
 			expect((plugin as any).statsService).toBeDefined();
-			
+
 			// Verify that the plugin can perform word count updates
 			expect(() => {
 				plugin.updateWordCount();

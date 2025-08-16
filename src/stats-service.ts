@@ -7,7 +7,10 @@ export class StatsService {
 	private lastSelectionHash = "";
 	private cachedSelectionStats: DocumentStats | null = null;
 
-	calculateStats(context: EditorContext, settings: MyPluginSettings): DocumentStats {
+	calculateStats(
+		context: EditorContext,
+		settings: MyPluginSettings,
+	): DocumentStats {
 		if (!context.hasActiveView) {
 			return {
 				wordCount: 0,
@@ -48,7 +51,10 @@ export class StatsService {
 		return stats;
 	}
 
-	calculateFullDocumentStats(fullText: string, settings: MyPluginSettings): DocumentStats {
+	calculateFullDocumentStats(
+		fullText: string,
+		settings: MyPluginSettings,
+	): DocumentStats {
 		const wordCount = getWordCount(fullText);
 		const readTime = calculateReadTime(wordCount, settings.wordsPerMinute);
 

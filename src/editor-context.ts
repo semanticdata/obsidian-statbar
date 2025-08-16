@@ -3,7 +3,7 @@ import { EditorContext } from "./types";
 
 export function getEditorContext(app: App): EditorContext {
 	const activeView = app.workspace.getActiveViewOfType(MarkdownView);
-	
+
 	if (!activeView) {
 		return {
 			hasActiveView: false,
@@ -18,11 +18,11 @@ export function getEditorContext(app: App): EditorContext {
 	}
 
 	const editor = activeView.editor;
-	
+
 	// Check if there's an actual selection by comparing cursor positions
 	const fromCursor = editor.getCursor("from");
 	const toCursor = editor.getCursor("to");
-	const hasSelection = 
+	const hasSelection =
 		fromCursor.line !== toCursor.line || fromCursor.ch !== toCursor.ch;
 
 	const selectedText = hasSelection ? editor.getSelection() : "";

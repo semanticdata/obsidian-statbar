@@ -24,7 +24,10 @@ export class DetailedStatsModal extends Modal {
 		}
 
 		// Calculate stats for current context (selection or full document)
-		const stats = this.statsService.calculateStats(context, this.plugin.settings);
+		const stats = this.statsService.calculateStats(
+			context,
+			this.plugin.settings,
+		);
 
 		// Current scope indicator (serves as main header)
 		if (context.isSelection) {

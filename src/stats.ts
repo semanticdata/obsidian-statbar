@@ -23,9 +23,10 @@ export function getWordCount(text: string): number {
 
 	// Split into words and trim punctuation from each word
 	// This preserves abbreviations like "e.g." and "i.e."
-	const words = cleanText.split(/\s+/).map(word => 
-		word.replace(/^[^\w\s]+|[^\w\s]+$/g, "")
-	).filter(word => word.length > 0);
+	const words = cleanText
+		.split(/\s+/)
+		.map((word) => word.replace(/^[^\w\s]+|[^\w\s]+$/g, ""))
+		.filter((word) => word.length > 0);
 
 	debugLog("After cleaning:", words.join(" "));
 	debugLog("Words array:", words);

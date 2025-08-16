@@ -172,7 +172,8 @@ export class StatBarSettingTab extends PluginSettingTab {
 					.addOption("after", "After")
 					.setValue(this.plugin.settings.readTimeLabelPosition)
 					.onChange(async (value) => {
-						this.plugin.settings.readTimeLabelPosition = value as ReadTimeLabelPosition;
+						this.plugin.settings.readTimeLabelPosition =
+							value as ReadTimeLabelPosition;
 						await this.plugin.saveSettings();
 						this.plugin.updateWordCount(); // Update display immediately
 					}),

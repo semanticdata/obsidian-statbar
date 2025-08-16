@@ -54,7 +54,10 @@ describe("StatBarPlugin Refactored Methods", () => {
 			(plugin as any).clearStatusBar();
 
 			expect(mockStatusBarItem.setText).toHaveBeenCalledWith("");
-			expect(mockStatusBarItem.setAttribute).toHaveBeenCalledWith("aria-label", "");
+			expect(mockStatusBarItem.setAttribute).toHaveBeenCalledWith(
+				"aria-label",
+				"",
+			);
 		});
 	});
 
@@ -113,7 +116,9 @@ describe("StatBarPlugin Refactored Methods", () => {
 
 			const result = (plugin as any).buildStatusText(context, stats);
 
-			expect(result).toBe("Words: 2  |  Characters: 12  |  0:30 min read");
+			expect(result).toBe(
+				"Words: 2  |  Characters: 12  |  0:30 min read",
+			);
 		});
 
 		test("should include selection prefix when text is selected", () => {
@@ -181,10 +186,10 @@ describe("StatBarPlugin Refactored Methods", () => {
 
 			expect(result).toBe(
 				"Document Stats:\n" +
-				"Full document\n" +
-				"Words: 2\n" +
-				"Characters: 12 (11 no spaces)\n" +
-				"Estimated Read Time: 0:30 minutes"
+					"Full document\n" +
+					"Words: 2\n" +
+					"Characters: 12 (11 no spaces)\n" +
+					"Estimated Read Time: 0:30 minutes",
 			);
 		});
 
@@ -197,10 +202,10 @@ describe("StatBarPlugin Refactored Methods", () => {
 
 			expect(result).toBe(
 				"Selection Stats:\n" +
-				"Selected text (4 chars)\n" +
-				"Words: 2\n" +
-				"Characters: 12 (11 no spaces)\n" +
-				"Estimated Read Time: 0:30 minutes"
+					"Selected text (4 chars)\n" +
+					"Words: 2\n" +
+					"Characters: 12 (11 no spaces)\n" +
+					"Estimated Read Time: 0:30 minutes",
 			);
 		});
 	});
@@ -213,7 +218,10 @@ describe("StatBarPlugin Refactored Methods", () => {
 			(plugin as any).updateStatusBarDisplay(statusText, tooltip);
 
 			expect(mockStatusBarItem.setText).toHaveBeenCalledWith(statusText);
-			expect(mockStatusBarItem.setAttribute).toHaveBeenCalledWith("aria-label", tooltip);
+			expect(mockStatusBarItem.setAttribute).toHaveBeenCalledWith(
+				"aria-label",
+				tooltip,
+			);
 		});
 
 		test("should clear aria-label when status text is empty", () => {
@@ -223,7 +231,10 @@ describe("StatBarPlugin Refactored Methods", () => {
 			(plugin as any).updateStatusBarDisplay(statusText, tooltip);
 
 			expect(mockStatusBarItem.setText).toHaveBeenCalledWith("");
-			expect(mockStatusBarItem.setAttribute).toHaveBeenCalledWith("aria-label", "");
+			expect(mockStatusBarItem.setAttribute).toHaveBeenCalledWith(
+				"aria-label",
+				"",
+			);
 		});
 
 		test("should handle status text with only whitespace", () => {
@@ -233,7 +244,10 @@ describe("StatBarPlugin Refactored Methods", () => {
 			(plugin as any).updateStatusBarDisplay(statusText, tooltip);
 
 			expect(mockStatusBarItem.setText).toHaveBeenCalledWith("   ");
-			expect(mockStatusBarItem.setAttribute).toHaveBeenCalledWith("aria-label", "");
+			expect(mockStatusBarItem.setAttribute).toHaveBeenCalledWith(
+				"aria-label",
+				"",
+			);
 		});
 	});
 });

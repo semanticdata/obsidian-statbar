@@ -6,8 +6,12 @@ import { EditorContext, MyPluginSettings } from "../src/types";
 import { DEFAULT_SETTINGS } from "../src/settings";
 import { getWordCount, calculateReadTime } from "../src/stats";
 
-const mockGetWordCount = getWordCount as jest.MockedFunction<typeof getWordCount>;
-const mockCalculateReadTime = calculateReadTime as jest.MockedFunction<typeof calculateReadTime>;
+const mockGetWordCount = getWordCount as jest.MockedFunction<
+	typeof getWordCount
+>;
+const mockCalculateReadTime = calculateReadTime as jest.MockedFunction<
+	typeof calculateReadTime
+>;
 
 describe("StatsService", () => {
 	let statsService: StatsService;
@@ -17,7 +21,7 @@ describe("StatsService", () => {
 		jest.clearAllMocks();
 		statsService = new StatsService();
 		mockSettings = { ...DEFAULT_SETTINGS };
-		
+
 		mockGetWordCount.mockReturnValue(10);
 		mockCalculateReadTime.mockReturnValue("0:30");
 	});
@@ -67,7 +71,10 @@ describe("StatsService", () => {
 			isSelection: false,
 		});
 		expect(mockGetWordCount).toHaveBeenCalledWith("This is test content");
-		expect(mockCalculateReadTime).toHaveBeenCalledWith(10, mockSettings.wordsPerMinute);
+		expect(mockCalculateReadTime).toHaveBeenCalledWith(
+			10,
+			mockSettings.wordsPerMinute,
+		);
 	});
 
 	test("should calculate stats for selected text", () => {
@@ -91,7 +98,10 @@ describe("StatsService", () => {
 			isSelection: true,
 		});
 		expect(mockGetWordCount).toHaveBeenCalledWith("selected");
-		expect(mockCalculateReadTime).toHaveBeenCalledWith(10, mockSettings.wordsPerMinute);
+		expect(mockCalculateReadTime).toHaveBeenCalledWith(
+			10,
+			mockSettings.wordsPerMinute,
+		);
 	});
 
 	test("should cache document stats and return cached result", () => {
@@ -161,7 +171,10 @@ describe("StatsService", () => {
 		mockGetWordCount.mockReturnValue(6);
 		mockCalculateReadTime.mockReturnValue("1:30");
 
-		const stats = statsService.calculateFullDocumentStats(fullText, mockSettings);
+		const stats = statsService.calculateFullDocumentStats(
+			fullText,
+			mockSettings,
+		);
 
 		expect(stats).toEqual({
 			wordCount: 6,
@@ -170,7 +183,10 @@ describe("StatsService", () => {
 			isSelection: false,
 		});
 		expect(mockGetWordCount).toHaveBeenCalledWith(fullText);
-		expect(mockCalculateReadTime).toHaveBeenCalledWith(6, mockSettings.wordsPerMinute);
+		expect(mockCalculateReadTime).toHaveBeenCalledWith(
+			6,
+			mockSettings.wordsPerMinute,
+		);
 	});
 
 	test("should recalculate when content changes", () => {
