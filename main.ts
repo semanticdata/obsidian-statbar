@@ -4,8 +4,9 @@ import {
 	MyPluginSettings,
 	DEFAULT_SETTINGS,
 } from "./src/settings";
+import { getEditorContext, EditorContext } from "./src/editor-context";
+import { StatsService } from "./src/stats-service";
 import { DocumentStats } from "./src/types";
-import { getWordCount, calculateReadTime } from "./src/stats";
 import { DetailedStatsModal } from "./src/modal";
 
 export default class StatBarPlugin extends Plugin {
@@ -15,10 +16,7 @@ export default class StatBarPlugin extends Plugin {
 
 	// Performance optimization properties
 	private debounceTimer: NodeJS.Timeout | null = null;
-	private lastContentHash = "";
-	private cachedStats: DocumentStats | null = null;
-	private lastSelectionHash = "";
-	private cachedSelectionStats: DocumentStats | null = null;
+	private statsService = new StatsService();
 
 	constructor(app: App, manifest: PluginManifest) {
 		super(app, manifest);
@@ -99,117 +97,87 @@ export default class StatBarPlugin extends Plugin {
 		this.addSettingTab(new StatBarSettingTab(this.app, this));
 	}
 
-	public updateWordCount() {
-		const activeView = this.app.workspace.getActiveViewOfType(MarkdownView);
+	private clearStatusBar(): void {
+		this.statusBarItemEl.setText("");
+		this.statusBarItemEl.setAttribute("aria-label", "");
+	}
 
-		if (activeView) {
-			const editor = activeView.editor;
+	private buildStatusText(context: EditorContext, stats: DocumentStats): string {
+		// Add selection prefix if text is selected and setting is enabled
+		const selectionPrefix =
+			context.isSelection && this.settings.showSelectionStats
+				? `${this.settings.selectionPrefix} `
+				: "";
 
-			// Check if there's an actual selection by comparing cursor positions
-			const fromCursor = editor.getCursor("from");
-			const toCursor = editor.getCursor("to");
-			const hasSelection =
-				fromCursor.line !== toCursor.line ||
-				fromCursor.ch !== toCursor.ch;
-
-			const selectedText = hasSelection ? editor.getSelection() : "";
-			const text = selectedText || activeView.getViewData(); // Use selected text if available
-			const isSelection = hasSelection && selectedText.length > 0;
-
-			// Check cache first (separate caching for selection vs document)
-			const contentHash = this.getContentHash(text);
-			const cachedStats = isSelection
-				? this.getCachedSelectionStats(contentHash)
-				: this.getCachedStats(contentHash);
-
-			let wordCount: number;
-			let readTime: string;
-
-			if (cachedStats) {
-				wordCount = cachedStats.wordCount;
-				readTime = cachedStats.readTime;
+		let statusText = "";
+		
+		if (this.settings.showWordCount) {
+			statusText += `${selectionPrefix}${
+				this.settings.wordLabel
+			} ${stats.wordCount.toLocaleString()}`;
+		}
+		
+		if (this.settings.showCharCount) {
+			if (statusText)
+				statusText += ` ${this.settings.separatorLabel} `;
+			statusText += `${
+				this.settings.charLabel
+			} ${stats.charCount.toLocaleString()}`;
+		}
+		
+		if (this.settings.showReadTime) {
+			if (statusText)
+				statusText += ` ${this.settings.separatorLabel} `;
+			if (this.settings.readTimeLabelPosition === "before") {
+				statusText += `${this.settings.readTimeLabel} ${stats.readTime}`;
 			} else {
-				wordCount = getWordCount(text);
-				readTime = calculateReadTime(
-					wordCount,
-					this.settings.wordsPerMinute,
-				);
-
-				// Cache the results (separate caching for selection vs document)
-				const stats: DocumentStats = {
-					wordCount,
-					charCount: text.length,
-					readTime,
-					isSelection,
-				};
-
-				if (isSelection) {
-					this.setCachedSelectionStats(contentHash, stats);
-				} else {
-					this.setCachedStats(contentHash, stats);
-				}
+				statusText += `${stats.readTime} ${this.settings.readTimeLabel}`;
 			}
+		}
 
-			const charCount = text.length;
-			const charNoSpaces = text.replace(/\s/g, "").length;
+		return statusText.trim();
+	}
 
-			// Add selection prefix if text is selected and setting is enabled
-			const selectionPrefix =
-				isSelection && this.settings.showSelectionStats
-					? `${this.settings.selectionPrefix} `
-					: "";
+	private buildTooltip(context: EditorContext, stats: DocumentStats): string {
+		const tooltipPrefix =
+			context.isSelection && this.settings.showSelectionStats
+				? "Selection Stats:\n"
+				: "Document Stats:\n";
+		const scopeInfo =
+			context.isSelection && this.settings.showSelectionStats
+				? `Selected text (${context.selectedText.length} chars)\n`
+				: "Full document\n";
 
-			let statusText = "";
-			if (this.settings.showWordCount) {
-				statusText += `${selectionPrefix}${
-					this.settings.wordLabel
-				} ${wordCount.toLocaleString()}`;
-			}
-			if (this.settings.showCharCount) {
-				if (statusText)
-					statusText += ` ${this.settings.separatorLabel} `;
-				statusText += `${
-					this.settings.charLabel
-				} ${charCount.toLocaleString()}`;
-			}
-			if (this.settings.showReadTime) {
-				if (statusText)
-					statusText += ` ${this.settings.separatorLabel} `;
-				if (this.settings.readTimeLabelPosition === "before") {
-					statusText += `${this.settings.readTimeLabel} ${readTime}`;
-				} else {
-					statusText += `${readTime} ${this.settings.readTimeLabel}`;
-				}
-			}
+		return tooltipPrefix +
+			scopeInfo +
+			`Words: ${stats.wordCount.toLocaleString()}\n` +
+			`Characters: ${stats.charCount.toLocaleString()} (${context.charNoSpaces.toLocaleString()} no spaces)\n` +
+			`Estimated Read Time: ${stats.readTime} minutes`;
+	}
 
-			this.statusBarItemEl.setText(statusText.trim());
-
-			// Add tooltip with additional details only if something is being displayed
-			if (statusText.trim()) {
-				const tooltipPrefix =
-					isSelection && this.settings.showSelectionStats
-						? "Selection Stats:\n"
-						: "Document Stats:\n";
-				const scopeInfo =
-					isSelection && this.settings.showSelectionStats
-						? `Selected text (${selectedText.length} chars)\n`
-						: "Full document\n";
-
-				this.statusBarItemEl.setAttribute(
-					"aria-label",
-					tooltipPrefix +
-						scopeInfo +
-						`Words: ${wordCount.toLocaleString()}\n` +
-						`Characters: ${charCount.toLocaleString()} (${charNoSpaces.toLocaleString()} no spaces)\n` +
-						`Estimated Read Time: ${readTime} minutes`,
-				);
-			} else {
-				this.statusBarItemEl.setAttribute("aria-label", "");
-			}
+	private updateStatusBarDisplay(statusText: string, tooltip: string): void {
+		this.statusBarItemEl.setText(statusText);
+		
+		if (statusText) {
+			this.statusBarItemEl.setAttribute("aria-label", tooltip);
 		} else {
-			this.statusBarItemEl.setText("");
 			this.statusBarItemEl.setAttribute("aria-label", "");
 		}
+	}
+
+	public updateWordCount() {
+		const context = getEditorContext(this.app);
+
+		if (!context.hasActiveView) {
+			this.clearStatusBar();
+			return;
+		}
+
+		const stats = this.statsService.calculateStats(context, this.settings);
+		const statusText = this.buildStatusText(context, stats);
+		const tooltip = statusText ? this.buildTooltip(context, stats) : "";
+		
+		this.updateStatusBarDisplay(statusText, tooltip);
 	}
 
 	public updateLastSavedTime() {
@@ -238,34 +206,6 @@ export default class StatBarPlugin extends Plugin {
 	private debouncedUpdate() {
 		if (this.debounceTimer) clearTimeout(this.debounceTimer);
 		this.debounceTimer = setTimeout(() => this.updateWordCount(), 300);
-	}
-
-	private getContentHash(text: string): string {
-		return text.length + text.slice(0, 100) + text.slice(-100);
-	}
-
-	private getCachedStats(hash: string): DocumentStats | null {
-		if (this.lastContentHash === hash && this.cachedStats) {
-			return this.cachedStats;
-		}
-		return null;
-	}
-
-	private setCachedStats(hash: string, stats: DocumentStats): void {
-		this.lastContentHash = hash;
-		this.cachedStats = stats;
-	}
-
-	private getCachedSelectionStats(hash: string): DocumentStats | null {
-		if (this.lastSelectionHash === hash && this.cachedSelectionStats) {
-			return this.cachedSelectionStats;
-		}
-		return null;
-	}
-
-	private setCachedSelectionStats(hash: string, stats: DocumentStats): void {
-		this.lastSelectionHash = hash;
-		this.cachedSelectionStats = stats;
 	}
 
 	private showDetailedStatsModal(): void {

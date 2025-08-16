@@ -10,7 +10,9 @@
 - Consolidate event handlers, perf improvements
 - Refactor `main.ts` into smaller, single-responsibility modules (`modal`, `stats`, `types`) for improved maintainability.
 - Update test suite to accomodate new project structure.
-- Improve `getWordCount` regex to handle abbreviations properly.
+- Improve `getWordCount` regex to handle abbreviations properly
+- Create shared services to eliminate code duplication between main plugin and modal
+- Refactor `updateWordCount` method into smaller, single-purpose functions for improved maintainability
 
 ### Added
 
@@ -24,6 +26,9 @@
     - Add prettier check to CI
     - Add `.prettierignore` file
     - Add new dependency `eslint-config-prettier`
+- Add `EditorContext` service for centralized editor state management
+- Add `StatsService` class with built-in caching for performance optimization
+- Add comprehensive unit tests for new shared services and refactored methods
 
 ## 1.0.0 - 2025-01-30
 

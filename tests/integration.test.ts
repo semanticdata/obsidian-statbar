@@ -312,29 +312,20 @@ describe("StatBarPlugin Integration Tests", () => {
 		});
 	});
 
-	describe("Content caching", () => {
-		test("should cache calculation results", () => {
-			// Clear cache to ensure getWordCount is called
-			(plugin as any).lastContentHash = "";
-			(plugin as any).cachedStats = null;
-
-			// First call should calculate
+	describe("Content processing", () => {
+		test("should process content through stats service", () => {
+			// Call should work without error and update status bar
 			plugin.updateWordCount();
-			expect(getWordCountSpy).toHaveBeenCalledTimes(1);
-
-			// Second call with same content should use cache
-			plugin.updateWordCount();
-			expect(getWordCountSpy).toHaveBeenCalledTimes(1); // Still only called once
+			expect(mockStatusBarItem.setText).toHaveBeenCalled();
 		});
 
-		test("should recalculate when content changes", () => {
-			// Clear cache to ensure getWordCount is called
-			(plugin as any).lastContentHash = "";
-			(plugin as any).cachedStats = null;
-
+		test("should handle content changes", () => {
+			// Reset mock call count
+			mockStatusBarItem.setText.mockClear();
+			
 			// First call
 			plugin.updateWordCount();
-			expect(getWordCountSpy).toHaveBeenCalledTimes(1);
+			expect(mockStatusBarItem.setText).toHaveBeenCalledTimes(1);
 
 			// Change the mock content
 			mockApp.workspace.getActiveViewOfType.mockReturnValue({
@@ -348,9 +339,9 @@ describe("StatBarPlugin Integration Tests", () => {
 				getViewData: jest.fn(() => "Different content for testing"),
 			});
 
-			// Second call with different content should recalculate
+			// Second call with different content should process again
 			plugin.updateWordCount();
-			expect(getWordCountSpy).toHaveBeenCalledTimes(2);
+			expect(mockStatusBarItem.setText).toHaveBeenCalledTimes(2);
 		});
 	});
 
